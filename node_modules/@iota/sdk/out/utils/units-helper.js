@@ -1,0 +1,123 @@
+"use strict";
+// Copyright 2020 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UnitsHelper = void 0;
+/**
+ * Class to help with units formatting.
+ */
+class UnitsHelper {
+    /**
+     * Format the value in the best units.
+     * @param value The value to format.
+     * @param decimalPlaces The number of decimal places to display.
+     * @returns The formatted value.
+     */
+    static formatBest(value, decimalPlaces = 2) {
+        return UnitsHelper.formatUnits(value, UnitsHelper.calculateBest(value), decimalPlaces);
+    }
+    /**
+     * Format the value in the best units.
+     * @param value The value to format.
+     * @param magnitude The magnitude to format with.
+     * @param decimalPlaces The number of decimal places to display.
+     * @returns The formatted value.
+     */
+    static formatUnits(value, magnitude, decimalPlaces = 2) {
+        if (!UnitsHelper.MAGNITUDE_MAP[magnitude]) {
+            throw new Error(`Unrecognized magnitude ${magnitude}`);
+        }
+        if (!value) {
+            return '0';
+        }
+        return magnitude === ''
+            ? `${value}`
+            : `${UnitsHelper.convertUnits(value, '', magnitude).toFixed(decimalPlaces)} ${magnitude}`;
+    }
+    /**
+     * Format the value in the best units.
+     * @param value The value to format.
+     * @returns The best units for the value.
+     */
+    static calculateBest(value) {
+        let bestUnits = '';
+        if (!value) {
+            return bestUnits;
+        }
+        const checkLength = Math.abs(value).toString().length;
+        if (checkLength > UnitsHelper.MAGNITUDE_MAP.P.dp) {
+            bestUnits = 'P';
+        }
+        else if (checkLength > UnitsHelper.MAGNITUDE_MAP.T.dp) {
+            bestUnits = 'T';
+        }
+        else if (checkLength > UnitsHelper.MAGNITUDE_MAP.G.dp) {
+            bestUnits = 'G';
+        }
+        else if (checkLength > UnitsHelper.MAGNITUDE_MAP.M.dp) {
+            bestUnits = 'M';
+        }
+        else if (checkLength > UnitsHelper.MAGNITUDE_MAP.K.dp) {
+            bestUnits = 'K';
+        }
+        return bestUnits;
+    }
+    /**
+     * Convert the value to different units.
+     * @param value The value to convert.
+     * @param from The from magnitude.
+     * @param to The to magnitude.
+     * @returns The formatted unit.
+     */
+    static convertUnits(value, from, to) {
+        if (!value) {
+            return 0;
+        }
+        if (!UnitsHelper.MAGNITUDE_MAP[from]) {
+            throw new Error(`Unrecognized fromUnit ${from}`);
+        }
+        if (!UnitsHelper.MAGNITUDE_MAP[to]) {
+            throw new Error(`Unrecognized toUnit ${to}`);
+        }
+        if (from === to) {
+            return Number(value);
+        }
+        const multiplier = value < 0 ? -1 : 1;
+        const scaledValue = (Math.abs(Number(value)) * UnitsHelper.MAGNITUDE_MAP[from].val) /
+            UnitsHelper.MAGNITUDE_MAP[to].val;
+        const numDecimals = UnitsHelper.MAGNITUDE_MAP[to].dp;
+        // We cant use toFixed to just convert the new value to a string with
+        // fixed decimal places as it will round, which we don't want
+        // instead we want to convert the value to a string and manually
+        // truncate the number of digits after the decimal
+        // Unfortunately large numbers end up in scientific notation with
+        // the regular toString() so we use a custom conversion.
+        let fixed = scaledValue.toString();
+        if (fixed.includes('e')) {
+            fixed = scaledValue.toFixed(Number.parseInt(fixed.split('-')[1], 10));
+        }
+        // Now we have the number as a full string we can split it into
+        // whole and decimals parts
+        const parts = fixed.split('.');
+        if (parts.length === 1) {
+            parts.push('0');
+        }
+        // Now truncate the decimals by the number allowed on the toUnit
+        parts[1] = parts[1].slice(0, numDecimals);
+        // Finally join the parts and convert back to a real number
+        return Number.parseFloat(`${parts[0]}.${parts[1]}`) * multiplier;
+    }
+}
+exports.UnitsHelper = UnitsHelper;
+/**
+ * Map units.
+ */
+UnitsHelper.MAGNITUDE_MAP = {
+    '': { val: 1, dp: 0 },
+    K: { val: 1000, dp: 3 },
+    M: { val: 1000000, dp: 6 },
+    G: { val: 1000000000, dp: 9 },
+    T: { val: 1000000000000, dp: 12 },
+    P: { val: 1000000000000000, dp: 15 },
+};
+//# sourceMappingURL=units-helper.js.map
