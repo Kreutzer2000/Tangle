@@ -1,36 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prueba de Concepto - Renzo Di Paola Jara</title>
-<!-- Bootstrap CSS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<!-- Incluir CryptoJS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Prueba de Concepto - Renzo Di Paola Jara</title>
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/style.css">
+        <!-- Incluir CryptoJS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+    </head>
 <body>
+
+<!-- Barra de Navegación -->
+<nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="#">Prueba de Concepto</a>
+</nav>
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8 text-center">
-            <h1>Prueba de Concepto</h1>
-            <p>Realizado por Renzo Di Paola Jara</p>
+            <h1>Red Tangle Cliente/Servidor</h1>
+            <p>Realizado por Renzo Di Paola Jara - Desarrollador Full Stack .Net, Python y NodeJS</p>
         </div>
     </div>
-    <div class="row justify-content-center">
+    <div class="row justify-content-center mt-4">
         <div class="col-md-6">
+            <!-- Sección de Carga de Archivo -->
             <div class="form-group">
                 <input type="file" class="form-control-file" id="fileInput">
             </div>
-            <button class="btn btn-primary btn-block" onclick="uploadFile()">Upload</button>
+            <button class="btn btn-primary btn-block" onclick="uploadFile()">Subir</button>
+             <!-- Sección para Recuperar Archivo -->
+            <input type="text" class="form-control mt-2" id="blockIdInput" placeholder="Ingresa el Block ID">
+            <button class="btn btn-secondary btn-block mt-2" onclick="retrieveFile(document.getElementById('blockIdInput').value)">Recuperar Archivo</button>
         </div>
+    </div>
+    <!-- Sección de Notificaciones -->
+    <div id="alert-container" class="container mt-4" style="display: none;">
+        <div class="alert alert-success" role="alert" id="alert-message"></div>
     </div>
 </div>
 
-<div id="alert-container" class="container mt-4" style="display: none;">
-    <div class="alert alert-success" role="alert" id="alert-message"></div>
+<!-- Descripción del Proyecto y la Arquitectura -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Descripción del Proyecto</h3>
+            <p>Este proyecto representa una Prueba de Concepto (PoC) que demuestra la implementación de una red Tangle cliente/servidor. Los usuarios pueden enviar un archivo encriptado a través de la red Tangle, que luego es recibido y desencriptado en el servidor. Algunos desafíos técnicos incluyeron:</p>
+            <ul>
+                <li>Configuración de la red Tangle: establecer una conexión confiable y segura fue esencial para el éxito del proyecto.</li>
+                <li>Implementación de un sistema de encriptación robusto: garantizar la encriptación y desencriptación segura de los datos fue crucial.</li>
+                <li>Transmisión de datos segura y eficiente: se tomaron medidas para asegurar la integridad y la seguridad de los datos en transmisión.</li>
+            </ul>
+            <p>Este proyecto ha proporcionado una comprensión profunda de las tecnologías blockchain y su aplicación para garantizar la integridad y seguridad de los datos. Las futuras implementaciones podrían incluir mejoras en la eficiencia de la transmisión, ampliación de la capacidad de la red y exploración de otras aplicaciones de blockchain para la ciberseguridad.</p>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-md-4 text-center">
+            <img src="https://blog.iota.org/content/images/2021/07/IOTA_SUSEE_Architecture.png" alt="Configuración de Tangle" class="img-fluid rounded-circle feature-image">
+            <h4 class="mt-2">Configuración de Tangle</h4>
+        </div>
+        <div class="col-md-4 text-center">
+            <img src="https://i.ytimg.com/vi/TYFLMbY0oTY/maxresdefault.jpg" alt="Sistema de Encriptación" class="img-fluid rounded-circle feature-image">
+            <h4 class="mt-2">Sistema de Encriptación</h4>
+        </div>
+        <div class="col-md-4 text-center">
+            <img src="images/imagendetransmisiondedatos.png" alt="Transmisión de Datos" class="img-fluid rounded-circle feature-image">
+            <h4 class="mt-2">Transmisión de Datos</h4>
+        </div>
+    </div>
 </div>
+<br><br>
 
 <!-- Incluir client.js -->
 <script src="client.js"></script> <!-- Asegúrate de que la ruta a client.js sea correcta -->
@@ -38,7 +79,8 @@
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

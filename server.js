@@ -3,12 +3,12 @@
 const express = require('express');
 const app = express();  // ¡Inicialización de la aplicación Express!
 const CryptoJS = require('crypto-js');
-//const { Client } = require('@iota/client');
 const { Client, Block, hexToUtf8, initLogger, TaggedDataPayload, utf8ToHex, Utils } = require('@iota/sdk');
 //const { composeAPI } = require('@iota/core');
 const { asciiToTrytes } = require('@iota/converter');  // Importa asciiToTrytes de @iota/converter
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/', limits: { fileSize: 10 * 1024 * 1024 } });  // Configura la carpeta de destino para los archivos cargados y un límite de tamaño de 10MB
+const upload = multer({ dest: 'uploads/', limits: { fileSize: 20 * 1024 * 1024 } });  // Configura la carpeta de destino para los archivos cargados y un límite de tamaño de 10MB
+const fs = require('fs').promises; 
 
 // Creación del cliente de IOTA
 const client = new Client({
@@ -31,75 +31,86 @@ app.post('/upload', upload.single('file'), async (req, res) => {
         return;
     }
 
-    const options = {
-        tag: utf8ToHex('Hello'),
-        data: utf8ToHex('Tangle'),
-    };
+    const secretKey = req.body.secretKey;
+    console.log(secretKey + " = esto es el secretKey de servidor");  // Comprueba que la clave secreta se ha configurado correctamente
+
+    const fileData = await fs.readFile(file.path);
+
+    const base64 = fileData.toString('base64');
+    //const wordArray = CryptoJS.enc.Base64.parse(base64);
+    const wordArray = CryptoJS.lib.WordArray.create(fileData);
+    const encrypted = CryptoJS.AES.encrypt(wordArray, secretKey);
+    const base64String = encrypted.toString();
     
-    // Cambio: Convierte el buffer del archivo directamente a una WordArray
-    const encryptedWordArray = CryptoJS.lib.WordArray.create(file.buffer);
-    const decrypted = CryptoJS.AES.decrypt(encryptedWordArray, 'secret key');
-    const decryptedFileData = decrypted.toString(CryptoJS.enc.Utf8);
-
-    const message = {
-        data: CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(decryptedFileData))
-    };
-    console.log(message + " " + message.data + "esto es el mensaje");
     try {
-        // Enviar el mensaje a la Tangle
-        const payload = asciiToTrytes(JSON.stringify(message));
-        console.log(payload + " " + payload.data + " " + "esto es el payload");
+        const decrypted = CryptoJS.AES.decrypt(base64, secretKey, {
+            format: CryptoJS.format.OpenSSL
+        }).toString(CryptoJS.enc.Latin1);
+        const decryptedFileData = decrypted.toString(CryptoJS.enc.Latin1);
         
-        const mnemonic = Utils.generateMnemonic();
-        const secretManager = { mnemonic: mnemonic };
+        if (!decryptedFileData) throw new Error('Decryption failed');
 
-        const blockIdAndBlock = await client.buildAndPostBlock();
-        console.log('Block:', blockIdAndBlock, '\n');
+        const options = {
+            tag: utf8ToHex('Hello'),
+            data: utf8ToHex(base64String),
+        };
 
-        // Fetch a block ID from the node.
-        const blockIds = await client.getTips();
-        console.log('Block IDs:', blockIds, '\n');
-
-        // Get the metadata for the block.
-        const blockMetadata = await client.getBlockMetadata(blockIds[0]);
-        console.log('Block metadata: ', blockMetadata, '\n');
-
-        // Request the block by its id.
-        const blockData = await client.getBlock(blockIds[0]);
-        console.log('Block data: ', blockData, '\n');
-
-        // Create block with tagged payload
-        const blockIdAndBlock_ej = await client.buildAndPostBlock(
-            secretManager,
-            options,
-        );
-
-        console.log(
-            `Block sent: ${process.env.EXPLORER_URL}/block/${blockIdAndBlock_ej[0]}`,
-        );
-
-        const fetchedBlock = await client.getBlock(blockIdAndBlock_ej[0]);
-        console.log('Block data: ', fetchedBlock);
-
-        if (fetchedBlock.payload instanceof TaggedDataPayload) {
-            const payload = fetchedBlock.payload ;
-            console.log('Decoded data:', hexToUtf8(payload.data));
+        try {
+            const mnemonic = Utils.generateMnemonic();
+            const secretManager = { mnemonic: mnemonic };
+    
+            // Create block with tagged payload
+            const blockIdAndBlock_ej = await client.buildAndPostBlock(
+                secretManager,
+                options,
+            );
+            console.log('Block sent: ', blockIdAndBlock_ej, '\n');
+    
+            const fetchedBlock = await client.getBlock(blockIdAndBlock_ej[0]);
+            console.log('Block data: ', fetchedBlock);
+    
+            const block = new Block();
+            block.protocolVersion = fetchedBlock.protocolVersion;
+            block.parents = fetchedBlock.parents;
+            block.payload = fetchedBlock.payload;
+            block.nonce = fetchedBlock.nonce;
+    
+            const blockId = await client.postBlock(block);
+            console.log('Block ID:', blockId);
+            res.json({ blockId });
+    
+        } catch (iotaError) {
+            // console.error('Error sending message to the Tangle:', JSON.stringify(iotaError, null, 2));
+            // res.status(500).send('Server error');
+            console.error('Error sending message to the Tangle:', iotaError);
+            res.status(500).send('Server error');
         }
 
-        const block = new Block();
-        block.protocolVersion = fetchedBlock.protocolVersion;
-        block.parents = fetchedBlock.parents;
-        block.payload = fetchedBlock.payload;
-        block.nonce = fetchedBlock.nonce;
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send('Server error');
+    }
 
-        const blockId = await client.postBlock(block);
-        console.log('Block ID:', blockId);
-        res.json({ blockId });
+    
+});
 
+app.get('/retrieve/:blockId', async (req, res) => {
+    const blockId = req.params.blockId;
+    console.log(blockId);
+    try {
+        const fetchedBlock = await client.getBlock(blockId);
+        console.log('Block data: ', fetchedBlock);
+        if (fetchedBlock.payload instanceof TaggedDataPayload) {
+            const payload = fetchedBlock.payload;
+            // const encryptedFileData = hexToUtf8(payload.data);
+            // res.send(encryptedFileData);
+            const encryptedFileDataBase64 = hexToUtf8(payload.data);
+            res.send({ encryptedFileData: encryptedFileDataBase64 });
+        } else {
+            res.status(400).send('Invalid block payload');
+        }
     } catch (iotaError) {
-        // console.error('Error sending message to the Tangle:', JSON.stringify(iotaError, null, 2));
-        // res.status(500).send('Server error');
-        console.error('Error sending message to the Tangle:', iotaError);
+        console.error('Error retrieving block from the Tangle:', iotaError);
         res.status(500).send('Server error');
     }
 });

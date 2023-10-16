@@ -1,0 +1,36 @@
+body {
+    background-color: #f7f9fc;
+    font-family: Arial, sans-serif;
+}
+.navbar {
+    background-color: #343a40 !important;
+}
+.navbar-brand {
+    color: white !important;
+}
+h1 {
+    color: #333;
+}
+h3 {
+    color: #555;
+}
+.btn-primary {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+}
+.container {
+    background-color: #ffffff;
+    border-radius: 5px;
+    padding: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+p {
+    text-align: justify;
+    text-align-last: center;
+}
+
+.feature-image {
+    width: 300px;  /* Ajusta este valor según lo necesites */
+    height: 300px;  /* Ajusta este valor según lo necesites */
+    object-fit: cover; /* Esto asegura que las imágenes se recorten en lugar de estirarse si tienen diferentes proporciones */
+}
