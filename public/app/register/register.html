@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Registro</title>
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <!-- Animate.css -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+        <!-- Custom CSS (opcional) -->
+        <style>
+            body {
+                background-color: #f0f0f0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin: 0;
+            }
+            .register-container {
+                background-color: white;
+                padding: 2em;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
+            .form-control:focus {
+                border-color: #66afe9;
+                box-shadow: none;
+            }
+        </style>
+    </head>
+<body>
+    <div class="register-container animate__animated animate__fadeInUp">
+        <h2 class="text-center">Registro</h2>
+        <form id="register-form">
+            <div class="form-group">
+                <label for="nombre">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" required>
+            </div>
+            <div class="form-group">
+                <label for="apellido">Apellido</label>
+                <input type="text" class="form-control" id="apellido" name="apellido" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="usuario">Nombre de usuario</label>
+                <input type="text" class="form-control" id="usuario" name="usuario" required>
+            </div>
+            <div class="form-group">
+                <label for="contrasena">Contraseña</label>
+                <input type="password" class="form-control" id="contrasena" name="contrasena" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Registrar</button>
+            <div class="text-center mt-3">
+                <a href="../login/login.html" class="btn btn-link">¿Ya tienes una cuenta? Inicia sesión aquí</a>
+            </div>
+        </form>
+    </div>
+
+<script>
+    console.log('register loaded');
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        // Añade el event listener al formulario de registro
+        document.getElementById('register-form').addEventListener('submit', registerUser);
+    });
+
+    async function registerUser(event) {
+        event.preventDefault();
+        const nombre = document.getElementById('nombre').value;
+        const apellido = document.getElementById('apellido').value;
+        const email = document.getElementById('email').value;
+        const usuario = document.getElementById('usuario').value;
+        const contrasena = document.getElementById('contrasena').value;
+
+        const response = await fetch('/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nombre, apellido, email, usuario, contrasena })
+        });
+
+        if (response.ok) {
+            alert('Registro exitoso');
+            // Limpiar los campos del formulario
+            document.getElementById('nombre').value = '';
+            document.getElementById('apellido').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('usuario').value = '';
+            document.getElementById('contrasena').value = '';
+        } else {
+            alert('Error en el registro');
+        }
+    }
+
+</script>
+
+<!-- <script src="../../js/user.js"></script> -->
+</body>
+</html>
