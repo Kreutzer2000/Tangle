@@ -40,7 +40,5 @@ select *
 from Usuarios
 
 select *
-from RegistrosAcceso
-
-select *
 from TransaccionesTangle
+

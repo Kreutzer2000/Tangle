@@ -14,6 +14,7 @@ const sha3 = require('js-sha3');
 const jwt = require('jsonwebtoken');  // Importa jsonwebtoken
 
 const expressJwt = require('express-jwt');
+const crypto = require('crypto');
 
 const app = express();  // ¡Inicialización de la aplicación Express!
 app.use(cookieParser());
@@ -178,19 +179,54 @@ app.post('/upload', upload.none(), async (req, res) => { // Cambio: upload.none(
 
 app.get('/retrieve/:blockId', async (req, res) => {
     const blockId = req.params.blockId;
+    
     console.log(blockId);
     try {
-        const fetchedBlock = await client.getBlock(blockId);
-        console.log('Block data: ', fetchedBlock);
-        if (fetchedBlock.payload instanceof TaggedDataPayload) {
-            const payload = fetchedBlock.payload;
-            // const encryptedFileData = hexToUtf8(payload.data);
-            // res.send(encryptedFileData);
-            const encryptedFileDataBase64 = hexToUtf8(payload.data);
-            res.send({ encryptedFileData: encryptedFileDataBase64 });
+        // Conexión a la base de datos
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request()
+            .input('BlockID', sql.NVarChar(255), blockId)
+            .query('SELECT * FROM TransaccionesTangle WHERE BlockID = @BlockID');
+        // sql.close();
+
+        // Verificar si el blockId existe en la base de datos
+        if (result.recordset.length > 0) {
+            const fetchedBlock = await client.getBlock(blockId);
+            console.log('Block data: ', fetchedBlock);
+            if (fetchedBlock.payload instanceof TaggedDataPayload) {
+                const payload = fetchedBlock.payload;
+                const encryptedFileDataBase64 = hexToUtf8(payload.data);
+                const dbData = result.recordset[0];  // Asumiendo que BlockID es único y sólo hay una entrada correspondiente en la DB
+
+                const usuarioid = dbData.UsuarioID;
+                // console.log(usuarioid);
+                const resultUsuario = await pool.request()
+                    .input('UsuarioID', sql.Int, usuarioid)
+                    .query('SELECT * FROM Usuarios WHERE UsuarioID = @UsuarioID');
+                // console.log(result.recordset);
+                sql.close();
+                const dbUsuario = resultUsuario.recordset[0];
+                // console.log(resultUsuario);
+                // Crear un objeto que contenga tanto los datos de la base de datos como los datos de Tangle
+                const responseData = {
+                    encryptedFileData: encryptedFileDataBase64,
+                    dbData: {
+                        id: dbData.TransaccionID,
+                        usuario: dbUsuario.Usuario,
+                        blockId: dbData.BlockID,
+                        hashSHA3: dbData.HashSHA3,
+                        fechaTransaccion: dbData.FechaTransaccion
+                    }
+                };
+
+                res.send(responseData);  // Envía la respuesta al cliente
+            } else {
+                res.status(400).send('Invalid block payload');
+            }
         } else {
-            res.status(400).send('Invalid block payload');
+            res.status(404).send('BlockID no encontrado en la base de datos');
         }
+
     } catch (iotaError) {
         console.error('Error retrieving block from the Tangle:', iotaError);
         res.status(500).send('Server error');
@@ -200,6 +236,10 @@ app.get('/retrieve/:blockId', async (req, res) => {
 // Ruta para registrar un nuevo usuario
 app.post('/register', express.json(), async (req, res) => {
     const { nombre, apellido, email, usuario, contrasena } = req.body;
+
+    // Hash de la contraseña
+    const hash = crypto.createHash('sha256').update(contrasena).digest('hex');
+    
     try {
         const pool = await sql.connect(dbConfig);
         const result = await pool.request()
@@ -207,7 +247,7 @@ app.post('/register', express.json(), async (req, res) => {
             .input('Apellido', sql.NVarChar(100), apellido)
             .input('Email', sql.NVarChar(255), email)
             .input('Usuario', sql.NVarChar(50), usuario)
-            .input('Contrasena', sql.NVarChar(255), contrasena)
+            .input('Contrasena', sql.NVarChar(255), hash)
             .query('INSERT INTO Usuarios (Nombre, Apellido, Email, Usuario, Contrasena) VALUES (@Nombre, @Apellido, @Email, @Usuario, @Contrasena)');
         sql.close();
         res.status(201).send('Usuario registrado');
@@ -223,11 +263,12 @@ app.post('/login',  async (req, res) => {
     const { usuario, contrasena } = req.body;
     console.log('Received login request for user:', usuario);  // Añade un log aquí
     console.log(usuario, contrasena);
+    const hash = crypto.createHash('sha256').update(contrasena).digest('hex');
     try {
         const pool = await sql.connect(dbConfig);
         const result = await pool.request()
             .input('Usuario', sql.NVarChar(50), usuario)
-            .input('Contrasena', sql.NVarChar(255), contrasena)
+            .input('Contrasena', sql.NVarChar(255), hash)
             .query('SELECT * FROM Usuarios WHERE Usuario = @Usuario AND Contrasena = @Contrasena');
         sql.close();
         if (result.recordset.length > 0) {

@@ -8,25 +8,44 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
         <!-- Animate.css -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+        <!-- SweetAlert2 CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/10.0.7/sweetalert2.min.css">
         <!-- Custom CSS (opcional) -->
         <style>
             body {
-                background-color: #f0f0f0;
+                background-color: #2c2f33;
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 min-height: 100vh;
                 margin: 0;
+                color: #ffffff;
+                font-family: 'Roboto', sans-serif;
             }
             .register-container {
-                background-color: white;
+                background-color: #23272a;
                 padding: 2em;
                 border-radius: 8px;
                 box-shadow: 0 0 10px rgba(0,0,0,0.1);
             }
+            .form-control {
+                background-color: #2c2f33;
+                color: #ffffff;
+                border: 1px solid #7289da;
+            }
             .form-control:focus {
-                border-color: #66afe9;
+                border-color: #7289da;
                 box-shadow: none;
+            }
+            .btn-primary {
+                background-color: #7289da;
+                border-color: #7289da;
+            }
+            .btn-link {
+                color: #7289da;
+            }
+            .btn-link:hover {
+                text-decoration: underline;
             }
         </style>
     </head>
@@ -61,6 +80,7 @@
         </form>
     </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
     console.log('register loaded');
 
@@ -86,7 +106,16 @@
         });
 
         if (response.ok) {
-            alert('Registro exitoso');
+            Swal.fire({
+                    icon: 'success',
+                    title: '¡Registro exitoso!',
+                    text: 'Se ha registrado con éxito. Ahora puede iniciar sesión.',
+                }).then((result) => {
+                if (result.isConfirmed) {
+                        // Redirige a la página de inicio de sesión después de que el usuario haga clic en el botón "OK" en la alerta
+                        window.location.href = '../login/login.html';
+                    }
+                });
             // Limpiar los campos del formulario
             document.getElementById('nombre').value = '';
             document.getElementById('apellido').value = '';
@@ -94,12 +123,15 @@
             document.getElementById('usuario').value = '';
             document.getElementById('contrasena').value = '';
         } else {
-            alert('Error en el registro');
+            Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Error en el registro',
+                });
         }
     }
 
 </script>
 
-<!-- <script src="../../js/user.js"></script> -->
 </body>
 </html>

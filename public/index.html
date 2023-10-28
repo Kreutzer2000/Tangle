@@ -6,6 +6,7 @@
         <title>Prueba de Concepto - Renzo Di Paola Jara</title>
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="css/style.css">
         <!-- Incluir CryptoJS -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
@@ -14,13 +15,22 @@
 <body>
 
 <!-- Barra de Navegación -->
-<nav class="navbar navbar-expand-lg">
-    <a class="navbar-brand" href="#">Prueba de Concepto</a>
-    <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-            <a class="nav-link" href="/logout" id="logoutButton">Cerrar Sesión</a>
-        </li>
-    </ul>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">
+        <img src="/images/LOGO_PAIP.png" alt="Logo PAIP" class="navbar-brand-img mr-2">
+        PoC - Luxen
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/logout" id="logoutButton">Cerrar Sesión</a>
+            </li>
+        </ul>
+    </div>
 </nav>
 
 <div class="container mt-5">
@@ -31,7 +41,7 @@
         </div>
     </div>
     <div class="row justify-content-center mt-4">
-        <div class="col-md-6">
+        <div class="col-md-8">
             <!-- Sección de Carga de Archivo -->
             <div class="form-group">
                 <input type="file" class="form-control-file" id="fileInput">
@@ -39,7 +49,7 @@
             <button class="btn btn-primary btn-block" onclick="uploadFile()">Subir</button>
              <!-- Sección para Recuperar Archivo -->
             <input type="text" class="form-control mt-2" id="blockIdInput" placeholder="Ingresa el Block ID">
-            <button class="btn btn-secondary btn-block mt-2" onclick="retrieveFile(document.getElementById('blockIdInput').value)">Recuperar Archivo</button>
+            <button class="btn btn-secondary btn-block mt-2" onclick="retrieveFile(document.getElementById('blockIdInput').value)">Consultar BlockID</button>
         </div>
     </div>
     <!-- Sección de Notificaciones -->
@@ -48,18 +58,39 @@
     </div>
 </div>
 
+<div class="container mt-5" id="data-container" style="display: none;">
+    <button id="toggleButton" class="btn btn-primary">Ocultar</button> <br><br>
+    <div class="table-responsive"> <!-- Añadida div con clase table-responsive -->
+        <table class="table table-bordered table-striped custom-table"> <!-- Añadidas clases table-striped -->
+            <thead class="thead-dark" style="text-align: center;"> <!-- Añadida clase thead-dark -->
+                <tr>
+                    <!-- <th>ID</th> -->
+                    <th>Usuario</th>
+                    <th>BlockID</th>
+                    <th>HashSHA3</th>
+                    <th>Fecha de Transacción</th>
+                </tr>
+            </thead>
+            <tbody class="table-active" id="data-table-body" style="color: floralwhite;">
+                <!-- Las filas de datos se insertarán aquí desde JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <!-- Descripción del Proyecto y la Arquitectura -->
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-12">
             <h3>Descripción del Proyecto</h3>
-            <p>Este proyecto representa una Prueba de Concepto (PoC) que demuestra la implementación de una red Tangle cliente/servidor. Los usuarios pueden enviar un archivo encriptado a través de la red Tangle, que luego es recibido y desencriptado en el servidor. Algunos desafíos técnicos incluyeron:</p>
+            <p>Este proyecto constituye una Prueba de Concepto (PoC) que ilustra la implementación de una red Tangle en una arquitectura cliente/servidor. Los usuarios tienen la capacidad de enviar un archivo encriptado a través de la red Tangle, que posteriormente es recibido y desencriptado en el servidor. Los desafíos técnicos abordados incluyen:</p>
             <ul>
-                <li>Configuración de la red Tangle: establecer una conexión confiable y segura fue esencial para el éxito del proyecto.</li>
-                <li>Implementación de un sistema de encriptación robusto: garantizar la encriptación y desencriptación segura de los datos fue crucial.</li>
-                <li>Transmisión de datos segura y eficiente: se tomaron medidas para asegurar la integridad y la seguridad de los datos en transmisión.</li>
+                <li>Configuración de la red Tangle: Se trabajó en establecer una conexión confiable y segura, lo cual fue esencial para el éxito del proyecto.</li>
+                <li>Implementación de un sistema de encriptación mediante el algoritmo SHA-3: La encriptación segura de los datos fue un aspecto crucial.</li>
+                <li>Transmisión segura y eficiente de datos: Se adoptaron medidas específicas para asegurar la integridad y seguridad de los datos en tránsito.</li>
             </ul>
-            <p>Este proyecto ha proporcionado una comprensión profunda de las tecnologías blockchain y su aplicación para garantizar la integridad y seguridad de los datos. Las futuras implementaciones podrían incluir mejoras en la eficiencia de la transmisión, ampliación de la capacidad de la red y exploración de otras aplicaciones de blockchain para la ciberseguridad.</p>
+            <p>La autenticación de usuarios se lleva a cabo a través de un sistema de registro e inicio de sesión, permitiendo así la creación de cuentas nuevas o el acceso a cuentas existentes. Una vez autenticados, los usuarios pueden acceder a la página principal para subir un archivo. La lógica del lado del cliente procesa el archivo, calcula el hash SHA-3 y lo envía al servidor. El servidor, a su vez, transmite este hash a la red Tangle y registra la información de la transacción en una base de datos SQL.</p>
+            <p>Este proyecto ha superado desafíos técnicos significativos, como la configuración de una conexión confiable y segura con la red Tangle, la implementación de un sistema robusto de encriptación y hashing, y la transmisión segura y eficiente de datos entre el cliente, el servidor y la red Tangle. Además, se ha logrado una comprensión profunda de las tecnologías blockchain y su aplicación en la garantía de la integridad y seguridad de los datos. Las futuras implementaciones podrían explorar mejoras en la eficiencia de la transmisión, expansión de la capacidad de la red y exploración de otras aplicaciones blockchain en el ámbito de la ciberseguridad.</p>
         </div>
     </div>
     <div class="row mt-4">
@@ -68,7 +99,7 @@
             <h4 class="mt-2">Configuración de Tangle</h4>
         </div>
         <div class="col-md-4 text-center">
-            <img src="https://i.ytimg.com/vi/TYFLMbY0oTY/maxresdefault.jpg" alt="Sistema de Encriptación" class="img-fluid rounded-circle feature-image">
+            <img src="https://i.ytimg.com/vi/bYqbwB7j95U/maxresdefault.jpg" alt="Sistema de Encriptación" class="img-fluid rounded-circle feature-image">
             <h4 class="mt-2">Sistema de Encriptación</h4>
         </div>
         <div class="col-md-4 text-center">
@@ -80,7 +111,6 @@
 <br><br>
 
 <!-- Incluir client.js -->
-
 <script src="client.js"></script> <!-- Asegúrate de que la ruta a client.js sea correcta -->
 
 <!-- Optional JavaScript -->
