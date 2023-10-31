@@ -90,3 +90,53 @@ p {
 .custom-table tbody tr {
     background-color: #2C3E50;  /* Color de fondo de fila personalizado */
 }
+
+/* Estilo personalizado para Select2 */
+.select2-container {
+    width: 100% !important;
+}
+
+.select2-container .select2-selection--single {
+    height: 38px;
+    font-size: 1rem; /* Opcional */
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 38px;
+}
+
+.select2-selection {
+    border-radius: 4px;
+    border-color: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #e0e0e0 !important;
+}
+
+.select2-selection__arrow {
+    color: #ffffff !important;
+}
+
+.select2-dropdown {
+    border-color: #ffffff !important;
+    background-color: #2c2f33 !important;
+}
+
+.select2-results__option {
+    color: #e0e0e0 !important;
+}
+
+.select2-results__option--highlighted {
+    background-color: #7289da !important;
+    color: white !important;
+}
+
+.files-list {
+    text-align: center;
+
+}
+
+#no-files-message {
+    display: none;
+    color: gray;
+    font-style: italic;
+}

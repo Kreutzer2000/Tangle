@@ -35,6 +35,11 @@
 --    FOREIGN KEY (UsuarioID) REFERENCES Usuarios(UsuarioID)
 --);
 
+--ALTER TABLE Usuarios
+--ADD NumeroTelefono NVARCHAR(15) NULL;
+
+--ALTER TABLE TransaccionesTangle
+--ADD ArchivoCifradoURL NVARCHAR(1024);
 
 select *
 from Usuarios
@@ -42,3 +47,6 @@ from Usuarios
 select *
 from TransaccionesTangle
 
+--update Usuarios
+--set NumeroTelefono = '913754400'
+--where UsuarioID = 1

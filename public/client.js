@@ -1,53 +1,83 @@
 let fileExtension = ''; // Almacena la extensión del archivo cargado
 let originalFileName = '';  // Almacena el nombre original del archivo
 
+const fileIconsMap = {
+  'txt': 'fa-file-alt',
+  'xlsx': 'fa-file-excel',
+  'xls': 'fa-file-excel',
+  'doc': 'fa-file-word',
+  'docx': 'fa-file-word',
+  'pdf': 'fa-file-pdf',
+  'ppt': 'fa-file-powerpoint',
+  'pptx': 'fa-file-powerpoint',
+  'jpg': 'fa-file-image',
+  'jpeg': 'fa-file-image',
+  'png': 'fa-file-image',
+  'gif': 'fa-file-image',
+  'zip': 'fa-file-archive',
+  'rar': 'fa-file-archive',
+  // ... puedes agregar más extensiones aquí
+};
+
 // Función para enviar el hash SHA-3 del archivo al servidor
 async function sendFileToServer(file) {
+  console.log(file);
   try {
+    const formDataStorage = new FormData();
+    formDataStorage.append('file', file);
+    console.log(file); // Añade esta línea
+    const responseStorage = await fetch('/uploadToAzure', {
+        method: 'POST',
+        body: formDataStorage,
+    });
+    const data = await responseStorage.json();
+    console.log(data);
+    const azureBlobUrl = data.azureBlobUrl;
+
+    console.log(azureBlobUrl);
     const reader = new FileReader();
-        reader.onload = async function(event) {
-            const fileData = event.target.result;
-            // Crear una nueva instancia de jsSHA
-            var shaObj = new jsSHA("SHA3-512", "ARRAYBUFFER");
-            // console.log(shaObj);
-            
-            // Poner los datos del archivo que deseas hashear
-            shaObj.update(fileData);
-            // console.log(fileData);
-            // Obtener el hash en formato hexadecimal
-            const hash = shaObj.getHash("HEX");
-            // console.log(hash);
-            const formData = new FormData();
-            formData.append('hash', hash);
+    reader.onload = async function(event) {
+        const fileData = event.target.result;
+        // Crear una nueva instancia de jsSHA
+        var shaObj = new jsSHA("SHA3-512", "ARRAYBUFFER");
+        // console.log(shaObj);
+        
+        // Poner los datos del archivo que deseas hashear
+        shaObj.update(fileData);
+        // console.log(fileData);
+        // Obtener el hash en formato hexadecimal
+        const hash = shaObj.getHash("HEX");
+        // console.log(hash);
+        const formData = new FormData();
+        formData.append('hash', hash);
+        formData.append('azureBlobUrl', azureBlobUrl); 
+        const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData,
+        })
+        if (!response.ok) {
+          const text = await response.text();
+          console.error('Server error:', text);
+          return;
+      }
 
-            const response = await fetch('/upload', {
-                method: 'POST',
-                body: formData,
-            });
+      const data = await response.json();
+      // console.log('Response from server:', data);
 
-            if (!response.ok) {
-              const text = await response.text();
-              console.error('Server error:', text);
-              return;
-          }
-    
-          const data = await response.json();
-          // console.log('Response from server:', data);
-    
-          if (data.blockId) {
-            document.getElementById('alert-message').textContent = 'Transacción enviada con éxito a la red Tangle. Block ID: ' + data.blockId;
-            document.getElementById('alert-container').style.display = 'block';
-            setTimeout(() => {
-              document.getElementById('alert-container').style.display = 'none';
-            }, 5000);  // 5000 milisegundos = 5 segundos
-          } else {
-              document.getElementById('alert-message').textContent = 'La transacción no se ha enviado correctamente';
-              document.getElementById('alert-container').style.display = 'block';
-              document.getElementById('alert-message').classList.remove('alert-success');
-              document.getElementById('alert-message').classList.add('alert-danger');
-          }
-        };
-        reader.readAsArrayBuffer(file);
+      if (data.blockId) {
+        document.getElementById('alert-message').textContent = 'Transacción enviada con éxito a la red Tangle. Block ID: ' + data.blockId;
+        document.getElementById('alert-container').style.display = 'block';
+        setTimeout(() => {
+          document.getElementById('alert-container').style.display = 'none';
+        }, 5000);  // 5000 milisegundos = 5 segundos
+      } else {
+          document.getElementById('alert-message').textContent = 'La transacción no se ha enviado correctamente';
+          document.getElementById('alert-container').style.display = 'block';
+          document.getElementById('alert-message').classList.remove('alert-success');
+          document.getElementById('alert-message').classList.add('alert-danger');
+      }
+    };
+    reader.readAsArrayBuffer(file);
   } catch (error) {
       console.error('Error:', error);
   }
@@ -142,6 +172,142 @@ async function retrieveFile(blockId) {
   }
 }
 
+async function retrieveFileByPhone(phone) {
+  const userSelect = document.getElementById('userSelect');
+  const selectedUserId = userSelect.value;
+  // Validar que el teléfono sólo contiene números
+  const phoneRegex = /^\d+$/;
+  if (!phoneRegex.test(phone)) {
+      Swal.fire({
+          icon: 'warning',
+          title: 'Número de teléfono inválido',
+          text: 'Por favor, ingresa sólo números en el campo de teléfono.',
+      });
+      return;
+  }
+  if (!phone && !selectedUserId) {
+      Swal.fire({
+          icon: 'warning',
+          title: 'Campos requeridos',
+          text: 'Por favor, selecciona un usuario e ingresa un número de teléfono.',
+      });
+      return;
+  }
+  if (!phone) {
+      Swal.fire({
+          icon: 'warning',
+          title: 'Ningún número de teléfono ingresado',
+          text: 'Por favor, ingresa un número de teléfono para consultar.',
+      });
+      return;
+  }
+  if (!selectedUserId) {
+      Swal.fire({
+          icon: 'warning',
+          title: 'Ningún usuario seleccionado',
+          text: 'Por favor, selecciona un usuario del menú desplegable.',
+      });
+      return;
+  }
+
+  // Eliminar el contenedor de archivos antes de hacer la consulta
+  const filesParentContainer = document.getElementById('files-parent-container');
+  const filesContainer = document.getElementById('files-container');
+  if (filesContainer) {
+      filesParentContainer.removeChild(filesContainer);
+  }
+
+  // Si ambos campos están llenos, proceder con la consulta
+  try {
+    const response = await await fetch(`/retrieveByPhone/${phone}/${selectedUserId}`);
+    
+    // Si hay resultados, agregar el contenedor de archivos de nuevo al DOM
+    const newFilesContainer = document.createElement('div');
+    newFilesContainer.id = 'files-container';
+    newFilesContainer.style.display = 'none';
+    newFilesContainer.innerHTML = `
+        <h3>Archivos asociados:</h3>
+        <div class="row files-list" id="files-list"></div>
+        <p id="no-files-message" style="text-align: center;">No hay archivos para mostrar.</p>
+    `;
+    filesParentContainer.appendChild(newFilesContainer);
+    const noFilesMessage = document.getElementById('no-files-message');
+
+    if (!response.ok) {
+      Swal.fire({
+          icon: 'info',
+          title: 'No se encontraron transacciones',
+          text: 'No hay transacciones asociadas a este número de teléfono y usuario.',
+      });
+      noFilesMessage.style.display = 'block';
+      newFilesContainer.style.display = 'block';
+      $('#userSelect').val('').trigger('change');
+      document.getElementById('phoneInput').value = '';  // Limpiar el input de teléfono
+      return;
+    }
+
+    const responseBody = await response.json();
+
+    if(responseBody.length === 0) {
+      Swal.fire({
+          icon: 'info',
+          title: 'No se encontraron transacciones',
+          text: 'No hay transacciones asociadas a este número de teléfono y usuario.',
+      });
+      noFilesMessage.style.display = 'block';
+      newFilesContainer.style.display = 'block';
+      $('#userSelect').val('').trigger('change');
+      document.getElementById('phoneInput').value = '';  // Limpiar el input de teléfono
+      return;
+    }
+
+    // Mostrar los archivos
+    const filesList = document.getElementById('files-list');
+      
+    // Limpiar la lista de archivos anterior
+    filesList.innerHTML = '';
+
+    // Iterar sobre todos los registros y añadirlos a la lista
+    responseBody.forEach(record => {
+      const fileLink = document.createElement('a');
+      fileLink.href = record.dbData.ArchivoCifradoURL;
+      fileLink.className = 'text-truncate d-block'; // Añade la clase para truncar el texto y asegurarte de que ocupe todo el ancho disponible
+      
+      // Extraer el nombre del archivo de la URL
+      const fileName = record.dbData.ArchivoCifradoURL.split('/').pop();
+      const fileExtension = fileName.split('.').pop().toLowerCase();
+      
+      // Decidir el icono basado en la extensión
+      let fileIconClass = fileIconsMap[fileExtension] || 'fa-file';
+      
+      const fileIcon = document.createElement('i');
+      fileIcon.className = `fas ${fileIconClass} fa-2x mb-2`; // Añade un margen inferior para separar el icono del nombre del archivo
+      
+      const fileDiv = document.createElement('div');
+      fileDiv.className = 'col-12 col-sm-6 col-md-6 col-lg-6'; // Ajusta el diseño de las columnas según el tamaño de pantalla
+      fileDiv.appendChild(fileIcon);
+      fileDiv.appendChild(document.createElement('br'));
+      fileDiv.appendChild(fileLink);
+      fileLink.innerText = fileName;
+      
+      filesList.appendChild(fileDiv);
+    });
+
+    if (responseBody.length > 0) {
+      noFilesMessage.style.display = 'none';
+    } else {
+      noFilesMessage.style.display = 'block';
+    }
+    
+    newFilesContainer.style.display = 'block'; // Mostrar la sección de archivos
+    $('#userSelect').val('').trigger('change');
+    document.getElementById('phoneInput').value = '';  // Limpiar el input de teléfono
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+
 // Función llamada cuando se hace clic en el botón de cargar
 function uploadFile() {
   const fileInput = document.getElementById('fileInput');
@@ -188,4 +354,42 @@ function toggleContainer() {
 document.getElementById('logoutButton').addEventListener('click', (event) => {
   event.preventDefault();  // Previene la navegación predeterminada
   window.location.href = '/logout';  // Redirige al usuario a la ruta de cierre de sesión
+});
+
+async function getUsersAndFillSelect() {
+  try {
+    const response = await fetch('/users');
+    if (!response.ok) {
+        console.error('Error fetching users:', await response.text());
+        return;
+    }
+    const users = await response.json();
+    const userSelect = document.getElementById('userSelect');
+    userSelect.innerHTML = '';  // Limpia cualquier opción anterior
+    
+    // Añade una opción predeterminada con texto y sin valor
+    const defaultOption = document.createElement('option');
+    defaultOption.textContent = 'Seleccionar usuario';
+    defaultOption.value = '';  // El valor vacío indica ninguna selección
+    defaultOption.selected = true;  // Esta opción es seleccionada por defecto
+    defaultOption.disabled = true;  // Esta opción no es seleccionable
+    userSelect.appendChild(defaultOption);
+
+    // Ahora añade las opciones para cada usuario
+    users.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user.UsuarioID;
+        option.textContent = user.Usuario;
+        userSelect.appendChild(option);
+    });
+  } catch (error) {
+      console.error('Error:', error);
+  }
+}
+
+// Llama a la función cuando la página se carga
+document.addEventListener('DOMContentLoaded', async () => {
+  await getUsersAndFillSelect();
+  // Inicializa Select2 en el combobox de usuarios
+  $('#userSelect').select2();
 });

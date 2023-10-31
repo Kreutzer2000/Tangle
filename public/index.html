@@ -7,6 +7,9 @@
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+        <!-- Select2 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link rel="stylesheet" href="css/style.css">
         <!-- Incluir CryptoJS -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
@@ -47,9 +50,29 @@
                 <input type="file" class="form-control-file" id="fileInput">
             </div>
             <button class="btn btn-primary btn-block" onclick="uploadFile()">Subir</button>
-             <!-- Sección para Recuperar Archivo -->
+            <!-- Sección para Recuperar Archivo -->
             <input type="text" class="form-control mt-2" id="blockIdInput" placeholder="Ingresa el Block ID">
             <button class="btn btn-secondary btn-block mt-2" onclick="retrieveFile(document.getElementById('blockIdInput').value)">Consultar BlockID</button>
+            <!-- Sección para Recuperar Archivo por Teléfono -->
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-12">
+                    <div class="form-row">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="phoneInput" placeholder="Ingresa el teléfono">
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <select class="form-control" id="userSelect">
+                                    <!-- Las opciones se llenarán desde JavaScript -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-secondary btn-block" onclick="retrieveFileByPhone(document.getElementById('phoneInput').value)">Recuperar Archivo</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <!-- Sección de Notificaciones -->
@@ -75,6 +98,16 @@
                 <!-- Las filas de datos se insertarán aquí desde JavaScript -->
             </tbody>
         </table>
+    </div>
+</div>
+
+<div class="container mt-5" id="files-parent-container">
+    <div id="files-container" style="display: none;">
+        <h3>Archivos asociados:</h3>
+        <div class="row files-list" id="files-list">
+            <!-- Aquí se insertarán los archivos desde JavaScript -->
+        </div>
+        <p id="no-files-message" style="text-align: center;">No hay archivos para mostrar.</p>
     </div>
 </div>
 
@@ -110,15 +143,20 @@
 </div>
 <br><br>
 
-<!-- Incluir client.js -->
-<script src="client.js"></script> <!-- Asegúrate de que la ruta a client.js sea correcta -->
 
-<!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+
+<!-- Optional JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Incluir client.js -->
+<script src="client.js"></script> <!-- Asegúrate de que la ruta a client.js sea correcta -->
 
 </body>
 </html>

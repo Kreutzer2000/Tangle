@@ -66,6 +66,10 @@
                 <input type="email" class="form-control" id="email" name="email" required>
             </div>
             <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="text" class="form-control" id="telefono" name="telefono" required>
+            </div>
+            <div class="form-group">
                 <label for="usuario">Nombre de usuario</label>
                 <input type="text" class="form-control" id="usuario" name="usuario" required>
             </div>
@@ -91,18 +95,29 @@
 
     async function registerUser(event) {
         event.preventDefault();
+        
         const nombre = document.getElementById('nombre').value;
         const apellido = document.getElementById('apellido').value;
         const email = document.getElementById('email').value;
-        const usuario = document.getElementById('usuario').value;
-        const contrasena = document.getElementById('contrasena').value;
+        const telefono = document.getElementById('telefono').value.trim();
+        const usuario = document.getElementById('usuario').value.trim();
+        const contrasena = document.getElementById('contrasena').value.trim();
+            
+        if (!telefono || !usuario || !contrasena) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Por favor, complete todos los campos obligatorios.',
+            });
+            return;
+        }
 
         const response = await fetch('/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ nombre, apellido, email, usuario, contrasena })
+            body: JSON.stringify({ nombre, apellido, email, usuario, contrasena, telefono })
         });
 
         if (response.ok) {
@@ -120,6 +135,7 @@
             document.getElementById('nombre').value = '';
             document.getElementById('apellido').value = '';
             document.getElementById('email').value = '';
+            document.getElementById('telefono').value = '';
             document.getElementById('usuario').value = '';
             document.getElementById('contrasena').value = '';
         } else {
