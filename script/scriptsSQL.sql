@@ -50,3 +50,10 @@ from TransaccionesTangle
 --update Usuarios
 --set NumeroTelefono = '913754400'
 --where UsuarioID = 1
+
+SELECT * 
+FROM TransaccionesTangle tt
+JOIN Usuarios u
+ON tt.UsuarioID = u.UsuarioID
+WHERE u.NumeroTelefono = '913754400'
+AND u.UsuarioID = 1 and tt.ArchivoCifradoURL NOT IN ('NULL', 'undefined')

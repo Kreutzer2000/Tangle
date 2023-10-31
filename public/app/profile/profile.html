@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        body {
+            background-color: #2c2f33;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #ffffff;
+            font-family: 'Roboto', sans-serif;
+        }
+        .profile-container {
+            background-color: #23272a;
+            padding: 2em;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .form-control {
+            background-color: #2c2f33;
+            color: #ffffff;
+            border: 1px solid #7289da;
+            display: inline-flex;
+        }
+        .form-control:focus {
+            border-color: #7289da;
+            box-shadow: none;
+        }
+        .btn-primary {
+            background-color: #7289da;
+            border-color: #7289da;
+        }
+        .btn-link {
+            color: #7289da;
+        }
+        .btn-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container animate__animated animate__fadeInUp">
+        <h1 class="text-center">Mi Perfil</h1>
+        <form id="profileForm">
+            <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input type="text" class="form-control" id="nombre" name="nombre">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="apellido">Apellido:</label>
+                <input type="text" class="form-control" id="apellido" name="apellido">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" id="email" name="email">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="telefono">Número de Teléfono:</label>
+                <input type="text" class="form-control" id="telefono" name="telefono">
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="usuario">Usuario:</label>
+                <input type="text" class="form-control" id="usuario" name="usuario">
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary btn-block">Guardar Cambios</button>
+            <button onclick="window.location.href='../../index.html'" type="button" class="btn btn-primary btn-block">Regresar a la página principal</button>
+        </form>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/getProfile');
+                if (response.ok) {
+                    const profile = await response.json();
+                    document.getElementById('nombre').value = profile.nombre;
+                    document.getElementById('apellido').value = profile.apellido;
+                    document.getElementById('email').value = profile.email;
+                    document.getElementById('usuario').value = profile.usuario;
+                    document.getElementById('telefono').value = profile.numeroTelefono;
+                } else {
+                    Swal.fire('Error', 'Error obteniendo el perfil del usuario: ' + response.statusText, 'error');
+                }
+            } catch (err) {
+                Swal.fire('Error', 'Ocurrió un error al cargar el perfil.', 'error');
+            }
+
+            // Funciones de validación
+            function esSoloLetras(input) {
+                const regex = /^[a-zA-Z\s]+$/;
+                return regex.test(input);
+            }
+
+            function esUsuarioValido(input) {
+                const regex = /^[a-zA-Z0-9]+$/;
+                return regex.test(input);
+            }
+
+            function esSoloNumeros(input) {
+                const regex = /^\d+$/;
+                return regex.test(input);
+            }
+        
+            document.getElementById('profileForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const nombre = document.getElementById('nombre').value;
+                const apellido = document.getElementById('apellido').value;
+                const email = document.getElementById('email').value;
+                const usuario = document.getElementById('usuario').value;
+                const telefono = document.getElementById('telefono').value;
+            
+                // Validaciones
+                if (!esSoloLetras(nombre)) {
+                    Swal.fire('Error', 'El nombre solo debe contener letras.', 'error');
+                    return;
+                }
+            
+                if (!esSoloLetras(apellido)) {
+                    Swal.fire('Error', 'El apellido solo debe contener letras.', 'error');
+                    return;
+                }
+            
+                if (!esUsuarioValido(usuario)) {
+                    Swal.fire('Error', 'El usuario solo puede contener letras y números.', 'error');
+                    return;
+                }
+            
+                if (!esSoloNumeros(telefono)) {
+                    Swal.fire('Error', 'El número de teléfono solo puede contener números.', 'error');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/updateProfile', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ nombre, apellido, email, usuario, telefono })
+                    });
+                    if (response.ok) {
+                        Swal.fire('Éxito', 'Perfil actualizado con éxito', 'success');
+                    } else {
+                        Swal.fire('Error', 'Error actualizando el perfil', 'error');
+                    }
+                } catch (err) {
+                    Swal.fire('Error', 'Ocurrió un error al actualizar el perfil.', 'error');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

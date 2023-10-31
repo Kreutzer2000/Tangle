@@ -93,6 +93,22 @@
         document.getElementById('register-form').addEventListener('submit', registerUser);
     });
 
+    // Funciones de validación
+    function esSoloLetras(input) {
+        const regex = /^[a-zA-Z\s]+$/;
+        return regex.test(input);
+    }
+    
+    function esUsuarioValido(input) {
+        const regex = /^[a-zA-Z0-9]+$/;
+        return regex.test(input);
+    }
+    
+    function esSoloNumeros(input) {
+        const regex = /^\d+$/;
+        return regex.test(input);
+    }
+
     async function registerUser(event) {
         event.preventDefault();
         
@@ -103,6 +119,27 @@
         const usuario = document.getElementById('usuario').value.trim();
         const contrasena = document.getElementById('contrasena').value.trim();
             
+        // Validaciones
+        if (!esSoloLetras(nombre)) {
+            Swal.fire('Error', 'El nombre solo debe contener letras.', 'error');
+            return;
+        }
+    
+        if (!esSoloLetras(apellido)) {
+            Swal.fire('Error', 'El apellido solo debe contener letras.', 'error');
+            return;
+        }
+    
+        if (!esUsuarioValido(usuario)) {
+            Swal.fire('Error', 'El usuario solo puede contener letras y números.', 'error');
+            return;
+        }
+    
+        if (!esSoloNumeros(telefono)) {
+            Swal.fire('Error', 'El número de teléfono solo puede contener números.', 'error');
+            return;
+        }
+
         if (!telefono || !usuario || !contrasena) {
             Swal.fire({
                 icon: 'error',

@@ -113,11 +113,66 @@ app.get('/', verifyToken, (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
+// Ruta para servir profile.html
+app.get('/profile', verifyToken, (req, res) => {
+    res.sendFile(__dirname + '/public/app/profile/profile.html');
+});
+
 // Ruta para cerrar sesión
 app.get('/logout', (req, res) => {
     res.clearCookie('token');  // Elimina la cookie 'token'
     res.redirect('/app/login/login.html');  // Redirecciona al usuario a la página de inicio de sesión
 });
+
+app.get('/getProfile', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request()
+            .input('UsuarioID', sql.Int, userId)
+            .query('SELECT Nombre, Apellido, Email, Usuario, NumeroTelefono FROM Usuarios WHERE UsuarioID = @UsuarioID');
+        sql.close();
+        if (result.recordset.length > 0) {
+            const user = result.recordset[0];
+            res.json({
+                nombre: user.Nombre,
+                apellido: user.Apellido,
+                email: user.Email,
+                usuario: user.Usuario,
+                numeroTelefono: user.NumeroTelefono
+            });
+        } else {
+            res.status(404).send('Usuario no encontrado');
+        }
+    } catch (err) {
+        console.error(err);
+        sql.close();
+        res.status(500).send('Error en el servidor');
+    }
+});
+
+app.post('/updateProfile', verifyToken, express.json(), async (req, res) => {
+    const { nombre, apellido, email, usuario, telefono } = req.body;
+    const userId = req.user.userId;
+    try {
+        const pool = await sql.connect(dbConfig);
+        await pool.request()
+            .input('UsuarioID', sql.Int, userId)
+            .input('Nombre', sql.NVarChar(100), nombre)
+            .input('Apellido', sql.NVarChar(100), apellido)
+            .input('Email', sql.NVarChar(255), email)
+            .input('Usuario', sql.NVarChar(50), usuario)
+            .input('NumeroTelefono', sql.NVarChar(15), telefono)
+            .query('UPDATE Usuarios SET Nombre = @Nombre, Apellido = @Apellido, Email = @Email, Usuario = @Usuario, NumeroTelefono = @NumeroTelefono WHERE UsuarioID = @UsuarioID');
+        sql.close();
+        res.status(200).send('Perfil actualizado');
+    } catch (err) {
+        console.error(err);
+        sql.close();
+        res.status(500).send('Error en el servidor');
+    }
+});
+
 
 app.post('/uploadToAzure', upload.single('file'), async (req, res) => {
     if (!req.file) {
