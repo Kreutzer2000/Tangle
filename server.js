@@ -33,12 +33,25 @@ const client = new Client({
 });
 
 // Configuración de la conexión a la base de datos
+// const dbConfig = {
+//     server: 'DESKTOP-C29VI7H\\PCRENZO',
+//     database: 'Tangle',
+//     driver: "msnodesqlv8",
+//     options: {
+//         trustedConnection: true,
+//         enableArithAbort: true
+//     }
+// };
+
 const dbConfig = {
-    server: 'DESKTOP-C29VI7H\\PCRENZO',
+    server: 'tangle.database.windows.net',
     database: 'Tangle',
-    driver: "msnodesqlv8",
+    user: 'rdipaolaj',
+    password: '12Enero2000###', // Reemplaza {your_password} con tu contraseña real
+    port: 1433,
     options: {
-        trustedConnection: true,
+        encrypt: true,
+        trustServerCertificate: false,
         enableArithAbort: true
     }
 };
@@ -91,7 +104,7 @@ app.get('/app/login/login.html', (req, res) => {
 // Función para verificar el token
 function verifyToken(req, res, next) {
     const token = req.cookies.token;
-    console.log(token + '\n' + "Este es el token de la cookie");
+    // console.log(token + '\n' + "Este es el token de la cookie");
     if (!token) {
         // No hay token, redirige a la página de login
         return res.redirect('/app/login/login.html');

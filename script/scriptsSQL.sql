@@ -41,6 +41,9 @@
 --ALTER TABLE TransaccionesTangle
 --ADD ArchivoCifradoURL NVARCHAR(1024);
 
+--ALTER TABLE Usuarios 
+--DROP COLUMN FechaUltimoAcceso;
+
 select *
 from Usuarios
 

@@ -21,20 +21,19 @@ const fileIconsMap = {
 
 // Función para enviar el hash SHA-3 del archivo al servidor
 async function sendFileToServer(file) {
-  console.log(file);
+  // console.log(file);
   try {
     const formDataStorage = new FormData();
     formDataStorage.append('file', file);
-    console.log(file); // Añade esta línea
     const responseStorage = await fetch('/uploadToAzure', {
         method: 'POST',
         body: formDataStorage,
     });
     const data = await responseStorage.json();
-    console.log(data);
+    // console.log(data);
     const azureBlobUrl = data.azureBlobUrl;
 
-    console.log(azureBlobUrl);
+    // console.log(azureBlobUrl);
     const reader = new FileReader();
     reader.onload = async function(event) {
         const fileData = event.target.result;
