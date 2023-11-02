@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación del servidor Express</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            color: #444;
+        }
+
+        h1 {
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            margin-top: 20px;
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        h3 {
+            margin-top: 15px;
+        }
+
+        p, ul, ol {
+            margin-top: 10px;
+        }
+
+        ul, ol {
+            padding-left: 20px;
+        }
+
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #ddd;
+        }
+
+        code {
+            background-color: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1 id="-documentaci-n-del-servidor-express">🌐 Documentación del servidor Express</h1>
+<h2 id="-introducci-n">📌 Introducción</h2>
+<p>Este documento describe detalladamente el funcionamiento y las rutas del servidor Express utilizado en el proyecto.</p>
+<hr>
+<h2 id="-importaciones-y-dependencias">📦 Importaciones y Dependencias</h2>
+<h3 id="1-express-">1. <strong>Express</strong></h3>
+<ul>
+<li><strong>Descripción</strong>: Framework web para Node.js.</li>
+<li><strong>Uso</strong>: Crear y manejar el servidor web.</li>
+</ul>
+<h3 id="2-cookie-parser-">2. <strong>Cookie-Parser</strong></h3>
+<ul>
+<li><strong>Descripción</strong>: Middleware para analizar cookies.</li>
+<li><strong>Uso</strong>: Leer y establecer cookies en el navegador del cliente.</li>
+</ul>
+<h3 id="3-mssql-msnodesqlv8-">3. <strong>MSSQL/MSNodeSQLv8</strong></h3>
+<ul>
+<li><strong>Descripción</strong>: Driver para conectar con SQL Server.</li>
+<li><strong>Uso</strong>: Conectar y realizar operaciones con la base de datos SQL Server.</li>
+</ul>
+<h3 id="4-iota-sdk-">4. <strong>@iota/sdk</strong></h3>
+<ul>
+<li><strong>Descripción</strong>: SDK oficial para trabajar con la red IOTA.</li>
+<li><strong>Uso</strong>: Realizar operaciones relacionadas con la red IOTA, como enviar y recibir transacciones.</li>
+</ul>
+<h3 id="5-multer-">5. <strong>Multer</strong></h3>
+<ul>
+<li><strong>Descripción</strong>: Middleware para manejar <code>multipart/form-data</code>, utilizado para subir archivos.</li>
+<li><strong>Uso</strong>: Procesar y guardar archivos subidos por el cliente.</li>
+</ul>
+<h3 id="6-fs-promises-">6. <strong>fs.promises</strong></h3>
+<ul>
+<li><strong>Descripción</strong>: Módulo de sistema de archivos con funciones que retornan promesas.</li>
+<li><strong>Uso</strong>: Leer y eliminar archivos de forma asíncrona.</li>
+</ul>
+<h3 id="7-js-sha3-">7. <strong>js-sha3</strong></h3>
+<ul>
+<li><strong>Descripción</strong>: Biblioteca para generar hashes SHA-3.</li>
+<li><strong>Uso</strong>: Crear hashes SHA-3 de los datos.</li>
+</ul>
+<h3 id="8-jsonwebtoken-">8. <strong>jsonwebtoken</strong></h3>
+<ul>
+<li><strong>Descripción</strong>: Biblioteca para trabajar con JSON Web Tokens.</li>
+<li><strong>Uso</strong>: Generar y verificar tokens JWT para autenticación.</li>
+</ul>
+<h3 id="9-express-jwt-">9. <strong>express-jwt</strong></h3>
+<ul>
+<li><strong>Descripción</strong>: Middleware para validar tokens JWT en aplicaciones Express.</li>
+<li><strong>Uso</strong>: Validar tokens JWT en las rutas protegidas.</li>
+</ul>
+<h3 id="10-crypto-">10. <strong>crypto</strong></h3>
+<ul>
+<li><strong>Descripción</strong>: Módulo nativo de Node.js para trabajar con criptografía.</li>
+<li><strong>Uso</strong>: Hashing de contraseñas.</li>
+</ul>
+<h3 id="11-azure-storage-blob-">11. <strong>@azure/storage-blob</strong></h3>
+<ul>
+<li><strong>Descripción</strong>: SDK de cliente para trabajar con Azure Blob Storage.</li>
+<li><strong>Uso</strong>: Subir y gestionar archivos en Azure Blob Storage.</li>
+</ul>
+<hr>
+<h2 id="-configuraci-n-inicial">🛠 Configuración Inicial</h2>
+<h3 id="azure-blob-storage">Azure Blob Storage</h3>
+<p>Se define la cadena de conexión para Azure Blob Storage, que se utiliza para almacenar archivos en la nube.</p>
+<h3 id="cliente-iota">Cliente IOTA</h3>
+<p>Se inicializa el cliente de IOTA para interactuar con la red Tangle.</p>
+<hr>
+<h2 id="-configuraci-n-de-la-base-de-datos">🗄 Configuración de la Base de Datos</h2>
+<p>Se proporcionan detalles sobre la configuración de conexión a la base de datos SQL Server. Hay dos configuraciones:</p>
+<ol>
+<li><strong>Local</strong>: Para una instancia local de SQL Server.</li>
+<li><strong>Azure</strong>: Para una instancia de SQL Server alojada en Azure.</li>
+</ol>
+<hr>
+<h2 id="-middleware-de-autenticaci-n">🔐 Middleware de Autenticación</h2>
+<h3 id="custom-jwt-middleware">Custom JWT Middleware</h3>
+<p>Middleware personalizado para manejar la autenticación con JWT. Este middleware:</p>
+<ul>
+<li>Verifica la validez del token.</li>
+<li>Redirige al usuario a la página de inicio de sesión si el token no es válido o ha expirado.</li>
+</ul>
+<hr>
+<h2 id="-rutas-del-servidor">🌐 Rutas del Servidor</h2>
+<h3 id="-rutas-est-ticas">📂 Rutas Estáticas</h3>
+<p>Se sirven archivos estáticos desde el directorio <code>public</code>, como HTML, CSS y JS.</p>
+<h3 id="-rutas-de-autenticaci-n">🔒 Rutas de Autenticación</h3>
+<ul>
+<li><strong>Login</strong>: Sirve la página de inicio de sesión y verifica las credenciales del usuario.</li>
+<li><strong>Logout</strong>: Cierra la sesión del usuario y elimina la cookie del token.</li>
+</ul>
+<h3 id="-rutas-de-api">📡 Rutas de API</h3>
+<ul>
+<li><strong>GetProfile</strong>: Obtiene información del perfil del usuario autenticado.</li>
+<li><strong>UpdateProfile</strong>: Actualiza la información del perfil del usuario autenticado.</li>
+<li><strong>UploadToAzure</strong>: Permite subir archivos a Azure Blob Storage.</li>
+<li><strong>Upload</strong>: Recibe y procesa el hash SHA-3 y la URL del archivo cifrado, luego envía el hash a la red Tangle y almacena los detalles en la base de datos.</li>
+<li><strong>Retrieve</strong>: Recupera la información de un bloque específico de la red Tangle basado en el ID del bloque.</li>
+<li><strong>RetrieveByPhone</strong>: Recupera la información de un bloque específico de la red Tangle basado en el número de teléfono y el ID del usuario.</li>
+<li><strong>Users</strong>: Obtiene una lista de todos los usuarios registrados.</li>
+</ul>
+<hr>
+<h2 id="-inicio-del-servidor">🚀 Inicio del Servidor</h2>
+<p>El servidor se inicia en el puerto 3000 o en el puerto definido en las variables de entorno.</p>
+<hr>
+<h2 id="-notas-finales">📝 Notas Finales</h2>
+<p>Este servidor es esencial para el funcionamiento del proyecto, maneja la autenticación, la interacción con la base de datos, y la comunicación con servicios externos como Azure y IOTA.</p>
+<hr>
+
+    </main>
+</body>
+</html>

@@ -386,6 +386,42 @@ async function getUsersAndFillSelect() {
   }
 }
 
+function obtenerDatos() {
+  // Realizar una solicitud AJAX al servidor para obtener los datos del usuario
+    fetch('/getProfile', {
+      method: 'GET',
+      credentials: 'include', // Para enviar cookies
+      headers: {
+          'Content-Type': 'application/json'
+      }
+  })
+  .then(response => response.json())
+  .then(datosUsuario => {
+      // Llenar la lista con los datos del usuario
+      const lista = document.getElementById('userDataList');
+      lista.innerHTML = `
+          <li>Nombre y Apellido: ${datosUsuario.nombre} ${datosUsuario.apellido}</li>
+          <li>Email: ${datosUsuario.email}</li>
+          <li>Teléfono: ${datosUsuario.numeroTelefono}</li>
+      `;
+  
+      // Mostrar el contenedor con los datos del usuario
+      document.getElementById('userDataContainer').style.display = 'block';
+  })
+  .catch(error => {
+    console.error('Error al obtener los datos del usuario:', error);
+  });
+}
+
+function ocultarDatos() {
+  // Oculta el contenedor con los datos del usuario
+  const container = document.getElementById('userDataContainer');
+  container.style.display = 'none';
+  
+  // Elimina el contenido del contenedor
+  document.getElementById('userDataList').innerHTML = '';
+}
+
 // Llama a la función cuando la página se carga
 document.addEventListener('DOMContentLoaded', async () => {
   await getUsersAndFillSelect();

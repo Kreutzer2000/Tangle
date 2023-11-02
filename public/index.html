@@ -43,7 +43,11 @@
     <div class="row justify-content-center">
         <div class="col-md-8 text-center">
             <h1>Red Tangle Cliente/Servidor</h1>
-            <p>Realizado por Renzo Di Paola Jara - Desarrollador Full Stack .Net, Python y NodeJS</p>
+            <p>
+                Realizado por Renzo Di Paola Jara - Desarrollador Full Stack .Net, Python y NodeJS
+                <br>
+                <a href="renzo_actualizadoCV.pdf" target="_blank">Ver CV</a> | <a href="mdmn.pdf" target="_blank">Ver trabajo relacionado</a>
+            </p>
         </div>
     </div>
     <div class="row justify-content-center mt-4">
@@ -74,6 +78,23 @@
                             <button class="btn btn-secondary btn-block" onclick="retrieveFileByPhone(document.getElementById('phoneInput').value)">Recuperar Archivo</button>
                         </div>
                     </div>
+                </div>
+            </div>
+            <!-- Botón para Obtener Datos -->
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-12 text-center">
+                    <button class="btn btn-info" onclick="obtenerDatos()" style=" width: 100%; display: block;">Obtener Datos</button>
+                </div>
+            </div>
+
+            <!-- Contenedor para mostrar los datos del usuario -->
+            <div class="row justify-content-center mt-4" id="userDataContainer" style="display: none;">
+                <div class="col-md-12">
+                    <ul id="userDataList">
+                        <!-- Aquí se insertarán los datos del usuario desde JavaScript -->
+                    </ul>
+                    <!-- Botón para ocultar el contenedor -->
+                    <button class="btn btn-secondary mt-2" onclick="ocultarDatos()">Ocultar Datos</button>
                 </div>
             </div>
         </div>
@@ -118,7 +139,7 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-12">
-            <h3>Descripción del Proyecto</h3>
+            <h3>Descripción del Proyecto <a href="/documentacion.html" target="_blank" style="font-size: 14px;">(Ver Documentación Detallada)</a></h3>
             <p>Este proyecto constituye una Prueba de Concepto (PoC) que ilustra la implementación de una red Tangle en una arquitectura cliente/servidor. Los usuarios tienen la capacidad de enviar un archivo encriptado a través de la red Tangle, que posteriormente es recibido y desencriptado en el servidor. Los desafíos técnicos abordados incluyen:</p>
             <ul>
                 <li>Configuración de la red Tangle: Se trabajó en establecer una conexión confiable y segura, lo cual fue esencial para el éxito del proyecto.</li>
