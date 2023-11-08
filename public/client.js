@@ -66,9 +66,7 @@ async function sendFileToServer(file) {
       if (data.blockId) {
         document.getElementById('alert-message').textContent = 'Transacción enviada con éxito a la red Tangle. Block ID: ' + data.blockId;
         document.getElementById('alert-container').style.display = 'block';
-        setTimeout(() => {
-          document.getElementById('alert-container').style.display = 'none';
-        }, 5000);  // 5000 milisegundos = 5 segundos
+        startTimer(30);
       } else {
           document.getElementById('alert-message').textContent = 'La transacción no se ha enviado correctamente';
           document.getElementById('alert-container').style.display = 'block';
@@ -80,6 +78,22 @@ async function sendFileToServer(file) {
   } catch (error) {
       console.error('Error:', error);
   }
+}
+
+function startTimer(duration) {
+  let timer = duration;
+  const timerElement = document.getElementById('timer');
+  timerElement.textContent = `Desaparecerá en ${timer} segundos`;
+
+  const interval = setInterval(() => {
+      timer--;
+      timerElement.textContent = `Desaparecerá en ${timer} segundos`;
+
+      if (timer <= 0) {
+          clearInterval(interval);
+          document.getElementById('alert-container').style.display = 'none';
+      }
+  }, 1000);
 }
 
 async function retrieveFile(blockId) {
