@@ -2,7 +2,8 @@
 // Importaciones necesarias
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const sql = require('mssql/msnodesqlv8');
+// const sql = require('mssql/msnodesqlv8');
+const sql = require('mssql');
 
 const { Client, Block, hexToUtf8, initLogger, TaggedDataPayload, utf8ToHex, Utils } = require('@iota/sdk');
 //const { composeAPI } = require('@iota/core');
