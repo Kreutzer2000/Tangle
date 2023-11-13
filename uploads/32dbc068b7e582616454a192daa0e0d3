@@ -1,0 +1,27 @@
+node.KUDernetes .10/unreacnao
+
+Events:
+Type Reason Age From Message
+Warning  FailedScheduling 18m default-scheduler 0/3 nodes are available: 3 Too many pods. preemption: 0/3 nodes are available: 3 No preemption victims found for incoming pod
+Normal Scheduled 17m default-scheduler Successfully assigned default/lpmsdocper-issdoc-754cd9bb58-gn9vz to ip-172-31-24-105.us-east-2.compute. internal
+Warning Failed 17m kubelet Failed to pull image "calidad—registry.toennjesamerica.com/lpmsdocper-issdoc:1.1.0.20231013.1": rpc error: code = Unknown desc = faile
+
+d to pull and unpack image "calidad-registry.toennjesamerica.com/lpmsdocper-issdoc:1.1.0.20231013.1": failed to copy: httpReadSecker: failed open: unexpected status code https://calidad-registry.toennjes
+america. com/v2/lpmsdocper-issdoc/blobs/sha256:14751a07710bf1fb70d9ce9b83c53aee1f47289c8dbilb8ecaSc990udf1efdac: 502 Bad Gateway
+
+Warning Failed 16m kubelet Failed to pull image "calidad-registry.toennjesamerica.com/lpmsdocper-issdoc:1.1.0.20231013.1": rpc error: code = Unknown desc = faile
+d to pull and unpack image "calidad-registry.toennjesamerica.com/lpmsdocper-issdoc:1.1.0.20231013.1": failed to copy: httpReadSecker: failed open: unexpected status code https://calidad-registry.toennjes
+america. com/v2/lpmsdocper-issdoc/blobs/sha256:801dafc15bf68130952e56bdcda56ed85cuc8e350cU6bd1bb6393fc1ub85fa: 502 Bad Gateway
+
+Normal — Pulting 15m (x4 over 17m) — kubelet Pulling image "calidad-registry.toennjesamerica.com/lpmsdocper-issdoc:1.1.0.20231013.1"
+
+Warning Failed 15m (x2 over 17m) — kubelet Failed to pull image "calidad—registry.toennjesamerica.com/lpmsdocper-issdoc:1.1.0.20231013.1": rpc error: code = Unknown desc = fail
+d to pull and unpack image "calidad-registry.toennjesamerica.con/lpnsdocper-issdoc:1.1.0.20231013.1": failed to resolve reference "calidad-registry.toennjesamerica.con/Lpnsdocper-issdoc:1.1.0.20231013.1"
+: pulling from host calidad-registry.toennjesamerica.com failed with status code [manifests 1.1.0.20231013.1]: 502 Bad Gateway
+
+Warning Failed 15m (x4 over 17m) kubelet Error: ErrImagePull
+
+Warning Failed 15m (x6 over 17m) kubelet Error: ImagePullBackoff
+
+Normal Back0ff 2m3s (x6 over 17m) kubelet Back-off pulling image "calidad—registry.toennjesamerica.com/lpmsdocper-issdoc:1.1.0.20231013.1"
+

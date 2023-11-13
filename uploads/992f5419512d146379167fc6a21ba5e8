@@ -1,0 +1,41 @@
+o 1 ET A o o o
+hornet-2 | 2023-10-11T01:00:217 INFO Tangle Valid milestone detected! Index: 14
+
+hornet-2 | 2023-10-11T01:00:217 INFO — Tangle Run solidity check for Milestone (14) ..
+
+hornet-2 | 2023-10-11T01:00:217 INFO — Tangle Solidifier finished: blocks: 0, collect: Os, solidity 0s, propagatio
+
+n: 0s, total: 0s
+
+hornet-1 1 INFO — Tangle Run solidity check for Milestone (14) ..
+
+hornet-1 1 INFO — Tangle Solidifier finished: blocks: 0, collect: Os, solidity 0s, propagatio
+n: 0s, total: 0s
+
+hornet-2 | 2023-10-11T01:00:217 INFO — Tangle Milestone confirmed (14): txsReferenced: 234, txsValue: 233, txszero
+Value: 1, txsConflicting: 0, collect: 311ms, total: 333ns
+
+hornet-2 | 2023-10-11T01:00:217 INFO — Tangle New confirmed milestone: 14, 49.00 BPS, 46.80 RBPS, 95.51% ref.rate
+inx-participation | 2023-10-11T0: INFO — Participation Applying milestone 14 with 247 new and 244 outputs took 0s
+inx-indexer | 2023-10-11T01:00:217 INFO Indexer Applying milestone 14 with 436 new and 434 consumed outputs took 123
+ms
+
+hornet-1 | reg(qu/pe/proc/lat): 00000/00000/00000/0000ms, reqQMs: 0, processor: 00000, CMI/LMI: 14/14, BPS (in/new/out): e
+0001/00026/00052, Tips (non-/semi-lazy): 98/0
+
+hornet-1 | 2023-10-11T01:00:217 INFO — Tangle Milestone confirmed (14): txsReferenced: 234, txsValue: 233, txszero
+Value: 1, txsConflicting: 0, collect: 220ms, total: 604ns
+
+hornet-1 | 2023-10-11T01:00:217 INFO — Tangle New confirmed milestone: 14, 49.20 BPS, 46.80 RBPS, 95.12% ref.rate
+hornet-2 | req(qu/pe/proc/lat): 00000/00000/00000/0000ns, regQMs: 6, processor: 00000, CMI/LMI: 14/14, BPS (in/new/out):
+0046/00023/00001, Tips (non-/semi-lazy): 91/0
+
+inx-coordinator — | 2023-10-11T01:00:227 INFO — Coordinator milestone issued (14) MilestoneID: 0x25cfb056399e7d4604a65as
+cAfadac827e371b0ed16d1f40ea537d9ec9b11652, BlockID: Ox3bbs16f542962cdada6c4f14d4641a161d9187fb98e83605307cd2c173e91641
+
+hornet-1 | reg(qu/pe/proc/lat): 00000/00000/00000/0000ms, reqQMs: O, processor: 00000, CMI/LMI: 14/14, BPS (in/new/out): e
+0000/00049/00098, Tips (non-/semi-lazy): 100/0
+
+hornet-2 | req(qu/pe/proc/lat): 00000/00000/00000/0000ns, regQMs: O, processor: 60000, CMI/LMI: 14/14, BPS (in/new/out): 0
+
+0046/00023/00001, Tips (non-/semi-lazy): 100/0
