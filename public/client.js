@@ -29,6 +29,22 @@ async function sendFileToServer(file) {
         method: 'POST',
         body: formDataStorage,
     });
+    console.log(responseStorage);
+    if (!responseStorage.ok) {
+      let errorMessage = 'Ocurrió un error al subir el archivo.';
+        if (responseStorage.status === 413) {
+            errorMessage = 'Error: El archivo es demasiado grande para ser cargado.';
+        }
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errorMessage,
+        });
+
+        return;
+    }
+
     const data = await responseStorage.json();
     // console.log(data);
     const azureBlobUrl = data.azureBlobUrl;
@@ -320,6 +336,15 @@ async function retrieveFileByPhone(phone) {
   }
 }
 
+// Dividir el archivo en partes
+function splitFile(file, chunkSize) {
+  let chunks = [];
+  for (let i = 0; i < file.size; i += chunkSize) {
+      let chunk = file.slice(i, i + chunkSize);
+      chunks.push(chunk);
+  }
+  return chunks;
+}
 
 // Función llamada cuando se hace clic en el botón de cargar
 function uploadFile() {
@@ -337,14 +362,14 @@ function uploadFile() {
   originalFileName = file.name.split('.').slice(0, -1).join('.');  // Guarda el nombre original del archivo sin la extensión
   fileExtension = file.name.split('.').pop();  // Guarda la extensión del archivo cargado
 
-  if (file.size > 25 * 1024) {  // Comprueba si el tamaño del archivo es mayor a 4KB
-    Swal.fire({
-        icon: 'error',
-        title: 'Archivo demasiado grande',
-        text: 'Elige un archivo de menos de 25KB.',
-    });
-    return;
-  }
+  // if (file.size > 25 * 1024) {  // Comprueba si el tamaño del archivo es mayor a 4KB
+  //   Swal.fire({
+  //       icon: 'error',
+  //       title: 'Archivo demasiado grande',
+  //       text: 'Elige un archivo de menos de 25KB.',
+  //   });
+  //   return;
+  // }
 
   sendFileToServer(file);
 }

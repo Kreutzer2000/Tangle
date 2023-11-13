@@ -7,7 +7,11 @@ const sql = require('mssql/msnodesqlv8');
 const { Client, Block, hexToUtf8, initLogger, TaggedDataPayload, utf8ToHex, Utils } = require('@iota/sdk');
 //const { composeAPI } = require('@iota/core');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/', limits: { fileSize: 30 * 1024 } });  
+// const upload = multer({ dest: 'uploads/', limits: { fileSize: 900000000000 * 1024 } });  
+const upload = multer({ 
+    dest: 'uploads/', 
+    limits: { fileSize: 200000 * 1024 } // Ejemplo para un límite de 200,000 KB (195 MB)
+});
 const fs = require('fs').promises; 
 // const fs = require('fs');
 const sha3 = require('js-sha3');
@@ -94,7 +98,7 @@ app.use(function (err, req, res, next) {
 
 // Sirve archivos estáticos desde el directorio 'public'
 app.use(express.static('public'));
-app.use(express.json({limit: '10mb'}));  // Agregar esto para parsear cuerpos JSON
+app.use(express.json({limit: '1000gb'}));  // Agregar esto para parsear cuerpos JSON
 
 // Ruta para servir login.html
 app.get('/app/login/login.html', (req, res) => {
@@ -199,6 +203,7 @@ app.post('/uploadToAzure', upload.single('file'), async (req, res) => {
             return res.status(400).send('No file uploaded');
         }
         const azureBlobUrl = await uploadFileToAzureBlob(file);
+        console.log(azureBlobUrl + '\n' + "Este es el azureBlobUrl");
         res.json({ azureBlobUrl });
     } catch (error) {
         console.error('Error uploading to Azure:', error);
@@ -214,11 +219,16 @@ async function uploadFileToAzureBlob(file) {
     const blobName = new Date().getTime() + file.originalname;
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
+    console.log(containerClient + '\n' + "Este es el containerClient");
+    console.log('\nUploading to Azure storage as blob:\n\t', blobName);
+    console.log('\n', blockBlobClient.url, '\n');
     // Lee el archivo del sistema de archivos de forma asíncrona
     const fileData = await fs.readFile(file.path);
+    // console.log(fileData + '\n' + "Este es el fileData");
 
     // Pasa los datos del archivo a uploadData
     const uploadBlobResponse = await blockBlobClient.uploadData(fileData);
+    console.log(uploadBlobResponse + '\n' + "Este es el uploadBlobResponse");
     
     // Establece el nivel de acceso del blob a "anónimo de solo lectura"
     await blockBlobClient.setAccessTier("Hot");  // Puedes cambiar "Cool" a "Hot" si prefieres ese nivel de acceso
@@ -252,7 +262,7 @@ app.post('/upload', upload.none(), async (req, res) => { // Cambio: upload.none(
             secretManager,
             options,
         );
-        // console.log('Block sent: ', blockIdAndBlock_ej, '\n');
+        console.log('Block sent: ', blockIdAndBlock_ej, '\n');
 
         const fetchedBlock = await client.getBlock(blockIdAndBlock_ej[0]);
         console.log('Block data: ', fetchedBlock);
