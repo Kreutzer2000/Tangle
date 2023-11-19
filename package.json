@@ -23,8 +23,10 @@
     "express-session": "^1.17.3",
     "js-sha3": "^0.9.2",
     "jsonwebtoken": "^9.0.2",
-    "msnodesqlv8": "^4.1.0",
     "mssql": "^10.0.1",
     "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "@flydotio/dockerfile": "^0.4.10"
   }
 }
