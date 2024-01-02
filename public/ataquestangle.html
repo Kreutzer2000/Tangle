@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ataques Potenciales en Tangle con Nodo Privado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #444;
+        }
+        h1 {
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+        h2 {
+            margin-top: 20px;
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        h3 {
+            margin-top: 15px;
+        }
+        p, ul, ol {
+            margin-top: 10px;
+        }
+        ul, ol {
+            padding-left: 20px;
+        }
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #ddd;
+        }
+        code {
+            background-color: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        main {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1 id="documentacion-tangle">🌐 Ataques Potenciales en Tangle con Nodo Privado</h1>
+        <hr>
+        <h2 id="introduccion">📌 Introducción</h2>
+        <p>Este documento ofrece un análisis exhaustivo de los tipos de ataques que pueden ocurrir en un nodo privado de Tangle, una tecnología subyacente de la criptomoneda IOTA, y proporciona estrategias detalladas para su mitigación.</p>
+
+        <h2 id="doble-gasto">⚖️ Ataque de Doble Gasto (Double Spending)</h2>
+        <p><strong>Descripción:</strong> Este ataque ocurre cuando un mismo conjunto de tokens de IOTA es gastado en más de una transacción. Los atacantes intentan aprovechar el lapso de tiempo en que una transacción no ha sido aún confirmada para duplicar el gasto.</p>
+        <p><strong>Mitigación:</strong> Implementación de un sistema robusto de detección de fraudes que monitorea y analiza patrones de transacciones para identificar intentos de doble gasto. Además, es crucial fortalecer el mecanismo de consenso de Tangle para asegurar una rápida y segura confirmación de las transacciones.</p>
+
+        <h2 id="peso-grande">🏋️‍♂️ Ataque de Peso Grande</h2>
+        <p><strong>Descripción:</strong> En un ataque de peso grande, el atacante crea transacciones con un peso desproporcionadamente alto en un intento de influenciar la selección de transacciones en el Tangle. Esto puede llevar a la confirmación de transacciones maliciosas o al retraso de transacciones legítimas.</p>
+        <p><strong>Mitigación:</strong> Establecimiento de un límite máximo en el peso que una transacción puede tener y la implementación de algoritmos que detecten y neutralicen transacciones con pesos anormales.</p>
+
+        <h2 id="cadena-parasita">🔗 Ataque de Cadena Parásita</h2>
+        <p><strong>Descripción:</strong> Un ataque de cadena parásita involucra la creación de una cadena alternativa de transacciones que eventualmente se conecta al Tangle principal. El objetivo puede ser desde la creación de una versión falsa del Tangle hasta el sabotaje de la red mediante la división de la atención de los nodos.</p>
+        <p><strong>Mitigación:</strong> Uso de algoritmos de selección de puntas como MCMC que son resistentes a este tipo de manipulación y realización de auditorías regulares del Tangle para identificar y aislar cadenas parásitas.</p>
+
+        <h2 id="autenticacion-autorizacion">🔑 Vulnerabilidades en Autenticación y Autorización</h2>
+        <p><strong>Descripción:</strong> Estas vulnerabilidades se presentan cuando los sistemas de autenticación y autorización del nodo son débiles, permitiendo a los atacantes acceder a funciones restringidas o manipular transacciones.</p>
+        <p><strong>Mitigación:</strong> Implementación de sistemas robustos de autenticación y autorización, como la autenticación de dos factores, y el uso de protocolos seguros para la comunicación de datos sensibles.</p>
+
+        <h2 id="sql-inyeccion">💉 Inyección SQL y Seguridad de la Base de Datos</h2>
+        <p><strong>Descripción:</strong> Las inyecciones SQL ocurren cuando un atacante aprovecha vulnerabilidades en la interfaz de la base de datos para ejecutar comandos SQL maliciosos, lo que puede resultar en la exposición o manipulación de datos sensibles.</p>
+        <p><strong>Mitigación:</strong> Uso de consultas parametrizadas y procedimientos almacenados para prevenir inyecciones SQL. Además, es crucial realizar una validación exhaustiva de todas las entradas para asegurar que sean seguras.</p>
+
+        <h2 id="carga-archivos">📦 Seguridad en la Carga de Archivos</h2>
+        <p><strong>Descripción:</strong> Los ataques en la carga de archivos pueden ocurrir cuando se permite a los usuarios subir archivos maliciosos, lo que podría llevar a la ejecución de código dañino en el servidor o la red.</p>
+        <p><strong>Mitigación:</strong> Implementación de estrictos controles de validación en los archivos subidos, incluyendo la verificación de tipos de archivos, tamaños y escaneo de malware.</p>
+
+        <h2 id="datos-sensibles">🔓 Exposición de Datos Sensibles</h2>
+        <p><strong>Descripción:</strong> La exposición de datos sensibles se refiere a situaciones donde información crítica como claves de acceso y credenciales son accesibles para personas no autorizadas, ya sea por configuraciones inseguras o prácticas deficientes de codificación.</p>
+        <p><strong>Mitigación:</strong> Asegurar que todas las credenciales y claves sean almacenadas de manera segura, preferentemente en sistemas de gestión de secretos, y emplear prácticas de codificación que eviten la exposición de datos sensibles.</p>
+
+        <hr>
+    </main>
+</body>
+</html>

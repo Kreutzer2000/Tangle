@@ -35,7 +35,16 @@ const containerName = 'storagetangle'; // El nombre de tu contenedor en Azure Bl
 // Creación del cliente de IOTA
 const client = new Client({
     nodes: ['https://api.testnet.shimmer.network'],
+    //nodes: ['http://35.194.18.16:14265']
 });
+
+const clients = [
+    new Client({ nodes: ['http://35.194.18.16:14265'] }), // Nodo 1
+    new Client({ nodes: ['http://35.194.18.16:14266'] }), // Nodo 2
+    new Client({ nodes: ['http://35.194.18.16:14267'] }), // Nodo 3
+    new Client({ nodes: ['http://35.194.18.16:14268'] }),  // Nodo 4
+    new Client({ nodes: ['https://api.testnet.shimmer.network'] })  // Nodo de Pruebas
+];
 
 // Configuración de la conexión a la base de datos
 // const dbConfig = {
@@ -239,6 +248,39 @@ async function uploadFileToAzureBlob(file) {
     return blockBlobClient.url; // Esta es la URL que guardarás en la base de datos
 }
 
+// Función para recuperar un bloque de la red Tangle (versión paralela) - Se usa
+async function retrieveBlockFromNodesParallel(blockId) {
+    console.log('Retrieving block from nodes in parallel...');
+    const blockPromises = clients.map(client => client.getBlock(blockId).catch(e => null));
+    console.log(blockPromises + '\n' + "Este es el blockPromises");
+    const results = await Promise.all(blockPromises);
+    console.log(results + '\n' + "Este es el results");
+    const fetchedBlock = results.find(block => block !== null);
+    console.log(fetchedBlock + '\n' + "Este es el fetchedBlock");
+    if (!fetchedBlock) {
+        throw new Error('Block not found on any node');
+    }
+    return fetchedBlock;
+}
+
+// Función para recuperar un bloque de la red Tangle (versión secuencial) - No se usa
+async function retrieveBlockFromNodes(blockId) {
+    for (const client of clients) {
+        try {
+            console.log('Retrieving block from node:', client.node);
+            const fetchedBlock = await client.getBlock(blockId);
+            console.log(fetchedBlock + '\n' + "Este es el fetchedBlock");
+            if (fetchedBlock) {
+                // Procesa el bloque y devuelve la respuesta
+                return fetchedBlock;
+            }
+        } catch (error) {
+            console.error('Error retrieving block from node:', error);
+        }
+    }
+    throw new Error('Block not found on any node');
+}
+
 // Maneja el hash SHA-3
 app.post('/upload', upload.none(), async (req, res) => { // Cambio: upload.none() ya que ya no estás enviando un archivo
     const hash = req.body.hash;
@@ -319,7 +361,9 @@ app.get('/retrieve/:blockId', async (req, res) => {
 
         // Verificar si el blockId existe en la base de datos
         if (result.recordset.length > 0) {
-            const fetchedBlock = await client.getBlock(blockId);
+            //const fetchedBlock = await client.getBlock(blockId);
+            const fetchedBlock = await retrieveBlockFromNodesParallel(blockId);
+            //const fetchedBlock = await retrieveBlockFromNodes(blockId);
             console.log('Block data: ', fetchedBlock);
             if (fetchedBlock.payload instanceof TaggedDataPayload) {
                 const payload = fetchedBlock.payload;
@@ -383,7 +427,8 @@ app.get('/retrieveByPhone/:phone/:userId', async (req, res) => {
         
         const responseData = await Promise.all(result.recordset.map(async dbData => {
             const blockId = dbData.BlockID;
-            const fetchedBlock = await client.getBlock(blockId);
+            //const fetchedBlock = await client.getBlock(blockId);
+            const fetchedBlock = await retrieveBlockFromNodesParallel(blockId);
             if (fetchedBlock.payload instanceof TaggedDataPayload) {
                 const payload = fetchedBlock.payload;
                 const encryptedFileDataBase64 = hexToUtf8(payload.data);
