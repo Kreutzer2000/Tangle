@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"No tests specified\"",
+    "test": "jest",
     "start": "node server.js"
   },
   "keywords": [],
@@ -27,6 +27,8 @@
     "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
-    "@flydotio/dockerfile": "^0.4.10"
+    "@flydotio/dockerfile": "^0.4.10",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
   }
 }

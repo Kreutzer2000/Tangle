@@ -534,6 +534,8 @@ app.post('/login',  async (req, res) => {
     }
 });
 
+module.exports = app; // Exporta la aplicación Express para las pruebas unitarias (pruebas de integración) en Jest
+
 // Inicia el servidor en el puerto 3000
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
