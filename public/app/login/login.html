@@ -64,6 +64,11 @@
                             <label for="password">Contraseña</label>
                             <input type="password" class="form-control" id="password" name="password" required autocomplete="current-password">
                         </div>
+                        <div class="form-group">
+                            <label for="token">Token</label>
+                            <input type="text" class="form-control" id="token" name="token" required>
+                        </div>
+                        <br>
                         <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
                         <div class="text-center mt-3">
                             <a href="../register/register.html" class="btn btn-link">¿No tienes una cuenta? Regístrate aquí</a>
@@ -88,7 +93,8 @@
         event.preventDefault();
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
-        console.log(username, password);
+        const token = document.getElementById('token').value; // Obtener el token del formulario
+        console.log(username, password, token);
         console.log('Sending login request');  // Añade un log aquí
         try {
             debugger;
@@ -98,7 +104,7 @@
                     'Content-Type': 'application/json'//,
                     //'Authorization': 'Bearer ' + localStorage.getItem('token')  // Añade el token al header
                 },
-                body: JSON.stringify({ usuario: username, contrasena: password })
+                body: JSON.stringify({ usuario: username, contrasena: password, token: token })
             });
 
             console.log('Received response:', response);  // Añade un log aquí
@@ -107,7 +113,7 @@
 
             console.log(responseData);  // Esto imprimirá la respuesta en la consola
             if (response.ok) {
-                document.cookie = `token=${responseData.token}; path=/`;  // Almacena el token como una cookie
+                document.cookie = `token=${responseData.accessToken}; path=/`;  // Almacena el token como una cookie
                 window.location.href = '/';
             } else {
                 Swal.fire({

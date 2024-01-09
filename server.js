@@ -4,6 +4,14 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 // const sql = require('mssql/msnodesqlv8');
 const sql = require('mssql');
+const connectDB = require('./db');
+
+// Importar node-seal
+const SEAL = require('node-seal');
+
+const nodemailer = require('nodemailer');
+
+const Usuario = require('./models/Usuario');
 
 const { Client, Block, hexToUtf8, initLogger, TaggedDataPayload, utf8ToHex, Utils } = require('@iota/sdk');
 //const { composeAPI } = require('@iota/core');
@@ -25,7 +33,7 @@ const { BlobServiceClient } = require('@azure/storage-blob');
 
 const app = express();  // ¡Inicialización de la aplicación Express!
 app.use(cookieParser());
-
+app.use(express.json()); // Para parsear cuerpos de solicitud JSON
 const generateAccessToken = require('./public/js/auth.js');
 
 const AZURE_STORAGE_CONNECTION_STRING = 'DefaultEndpointsProtocol=https;AccountName=tanglestore;AccountKey=ZTFvf57GOFp+IF1mEwwcbkJ1BYyYZm3+bTuxYDiVNbvAzKYfPEV5ZlDhzBk0+xuErUL8V53QpckE+AStfKK+xg==;EndpointSuffix=core.windows.net'; // Obtén esto desde el portal de Azure
@@ -34,8 +42,8 @@ const containerName = 'storagetangle'; // El nombre de tu contenedor en Azure Bl
 
 // Creación del cliente de IOTA
 const client = new Client({
-    nodes: ['https://api.testnet.shimmer.network'],
-    //nodes: ['http://35.194.18.16:14265']
+    //nodes: ['https://api.testnet.shimmer.network'],
+    nodes: ['http://35.194.18.16:14265']
 });
 
 const clients = [
@@ -47,19 +55,10 @@ const clients = [
 ];
 
 // Configuración de la conexión a la base de datos
-// const dbConfig = {
-//     server: 'DESKTOP-C29VI7H\\PCRENZO',
-//     database: 'Tangle',
-//     driver: "msnodesqlv8",
-//     options: {
-//         trustedConnection: true,
-//         enableArithAbort: true
-//     }
-// };
-
 const dbConfig = {
     server: 'tangle.database.windows.net',
-    database: 'Tangle',
+    //database: 'Tangle', // Produccion
+    database: 'TanglePruebas', // Pruebas
     user: 'rdipaolaj',
     password: '12Enero2000###', // Reemplaza {your_password} con tu contraseña real
     port: 1433,
@@ -70,8 +69,167 @@ const dbConfig = {
     }
 };
 
+// Conectarse a la base de datos MongoDB
+connectDB();
+
 initLogger();
 
+// Función para inicializar el sistema de cifrado homomórfico
+async function initializeSeal() {
+    const seal = await SEAL();
+    const schemeType = seal.SchemeType.bfv;
+    const polyModulusDegree = 4096;
+    const bitSizes = [36, 36, 37];
+    const bitSize = 20;
+
+    const parms = seal.EncryptionParameters(schemeType);
+
+    parms.setPolyModulusDegree(polyModulusDegree);
+    parms.setCoeffModulus(seal.CoeffModulus.Create(polyModulusDegree, Int32Array.from(bitSizes)));
+    parms.setPlainModulus(seal.PlainModulus.Batching(polyModulusDegree, bitSize));
+
+    const context = seal.Context(parms, true, seal.SecurityLevel.tc128);
+
+    const keyGenerator = seal.KeyGenerator(context);
+    const publicKey = keyGenerator.createPublicKey();
+    const secretKey = keyGenerator.secretKey();
+
+    return {
+        seal,
+        context,
+        keyGenerator,
+        publicKey,
+        secretKey
+    };
+}
+
+// Función de prueba para verificar la correspondencia de claves mediante cifrado y descifrado
+async function testEncryption() {
+    try {
+        const testText = "Prueba";
+        const encryptedText = await encryptText(testText);
+        //console.log("Texto cifrado:", encryptedText);
+        const decryptedText = await decryptText(encryptedText);
+        //console.log("Texto descifrado:", decryptedText);
+
+        if (decryptedText === testText) {
+            console.log("Prueba de cifrado/descifrado exitosa: las claves parecen corresponder.");
+            return true;
+        } else {
+            console.error("Prueba de cifrado/descifrado fallida: las claves podrían no corresponder.");
+            return false;
+        }
+    } catch (error) {
+        console.error("Error durante la prueba de cifrado/descifrado:", error);
+        return false;
+    }
+}
+
+let sealObjects;
+initializeSeal().then(objects => {
+    sealObjects = objects;
+    console.log("SEAL inicializado correctamente");
+
+    // Envolver la llamada en una función asíncrona anónima autoejecutable
+    (async () => {
+        const testResult = await testEncryption();
+        if (!testResult) {
+            // Manejar el caso en que la prueba falla
+            console.error("Error en la prueba de cifrado/descifrado");
+        } else {
+            console.log("Prueba de cifrado/descifrado exitosa");
+        }
+    })();
+});
+
+// Función para cifrar texto
+async function encryptText(text) {
+    if (!sealObjects) {
+        throw new Error("SEAL no está inicializado");
+    }
+
+    try {
+        const batchEncoder = sealObjects.seal.BatchEncoder(sealObjects.context);
+        const textArray = Int32Array.from(text.split('').map(char => char.charCodeAt(0)));
+        const plaintext = sealObjects.seal.PlainText();
+        batchEncoder.encode(textArray, plaintext);
+
+        const encryptor = sealObjects.seal.Encryptor(sealObjects.context, sealObjects.publicKey);
+        const ciphertext = sealObjects.seal.CipherText();
+        encryptor.encrypt(plaintext, ciphertext);
+
+        // Serializar el CipherText a un Buffer y luego a Base64
+        const buffer = ciphertext.save();
+        console.log("Buffer serializado:", buffer);
+        console.log("Tamaño del buffer serializado (antes de Base64):", buffer.length);
+        return buffer.toString('base64');
+    } catch (error) {
+        console.error('Error al cifrar el texto:', error);
+        throw error;
+    }
+}
+
+async function decryptText(encryptedText) {
+    //console.log("Texto cifrado recibido:", encryptedText);
+    if (!sealObjects) {
+        console.error("Error: SEAL no está inicializado.");
+        throw new Error("SEAL no está inicializado");
+    }
+
+    try {
+        // Convierte la cadena Base64 de nuevo a un Buffer
+        const buffer = Buffer.from(encryptedText, 'base64');
+        //console.log("Buffer convertido:", buffer.toString('hex'));
+        console.log("Buffer convertido (Base64 a buffer):", buffer);
+        console.log("Tamaño del buffer (después de Base64):", buffer.length);
+
+        // Cargar el CipherText desde el Buffer
+        const ciphertext = sealObjects.seal.CipherText();
+        if (!ciphertext.load(sealObjects.context, buffer)) {
+            throw new Error("Error al cargar CipherText desde el buffer");
+        }
+
+        console.log("Ciphertext cargado correctamente");
+
+        // Proceso de descifrado
+        const decryptor = sealObjects.seal.Decryptor(sealObjects.context, sealObjects.secretKey);
+        const decryptedPlaintext = sealObjects.seal.PlainText();
+        decryptor.decrypt(ciphertext, decryptedPlaintext);
+        console.log("Texto descifrado exitosamente");
+
+        // Decodificar el Plaintext
+        const batchEncoder = sealObjects.seal.BatchEncoder(sealObjects.context);
+        const decodedArray = batchEncoder.decode(decryptedPlaintext);
+        const decodedText = String.fromCharCode.apply(null, decodedArray);
+        console.log("Texto descifrado:", decodedText);
+
+        return decodedText;
+    } catch (error) {
+        console.error('Error al descifrar el texto:', error);
+        throw error;
+    }
+}
+
+// Función para generar un token aleatorio
+function generateRandomToken() {
+    const tokenLength = 20; // Longitud deseada del token
+    const possibleCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=';
+    
+    let token = '';
+    for (let i = 0; i < tokenLength; i++) {
+        const randomIndex = Math.floor(Math.random() * possibleCharacters.length);
+        token += possibleCharacters[randomIndex];
+    }
+
+    return token;
+}
+
+// Función para cifrar el token con SHA-256
+function encryptToken(token) {
+    return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+// Middleware para verificar el token
 function customJwtMiddleware(req, res, next) {
     // Lista de rutas que deseas permitir sin autenticación
     const allowedPaths = ['/app/login/login.html', '/app/register/register.html', '/login', '/register', '/logout'];
@@ -474,6 +632,32 @@ app.get('/users', async (req, res) => {
     }
 });
 
+// Configuración del transportador SMTP para Outlook
+let transporter = nodemailer.createTransport({
+    service: 'Outlook365', // Especifica Outlook como servicio
+    auth: {
+        user: 'rdipaolaj@outlook.com',
+        pass: '12Enero2000---'
+    }
+});
+
+// Función para enviar el token por correo electrónico
+async function sendTokenByEmail(email, token) {
+    let mailOptions = {
+        from: 'rdipaolaj@outlook.com',
+        to: email,
+        subject: 'Tu Token de Logeo al Sistema',
+        text: `Tu token es: ${token} \nUsa este token para entrar al sistema.`
+    };
+
+    try {
+        let info = await transporter.sendMail(mailOptions);
+        console.log('Email enviado: ' + info.response);
+    } catch (error) {
+        console.error('Error al enviar el email:', error);
+    }
+}
+
 // Ruta para registrar un nuevo usuario
 app.post('/register', express.json(), async (req, res) => {
     const { nombre, apellido, email, usuario, contrasena, telefono } = req.body;
@@ -481,22 +665,41 @@ app.post('/register', express.json(), async (req, res) => {
     if (!telefono || !usuario || !contrasena) {
         return res.status(400).send('Los campos obligatorios no están completos.');
     }
+
+    const rawToken = generateRandomToken();
+
+    // Envía el token por correo electrónico
+    sendTokenByEmail(email, rawToken);
+
+    const encryptedToken = encryptToken(rawToken);
+
+    console.log('Token:', rawToken); // Token sin cifrar
+    console.log('Encrypted Token:', encryptedToken); // Token cifrado
     
-    // Hash de la contraseña
-    const hash = crypto.createHash('sha256').update(contrasena).digest('hex');
+    // Espera a que cada campo sea cifrado antes de continuar
+    const encryptedNombre = await encryptText(nombre);
+    const encryptedApellido = await encryptText(apellido);
+    const encryptedEmail = await encryptText(email);
+    const encryptedUsuario = await encryptText(usuario);
+    const encryptedContrasena = await encryptText(contrasena);
+    const encryptedTelefono = await encryptText(telefono);
     
     try {
-        const pool = await sql.connect(dbConfig);
-        const result = await pool.request()
-            .input('Nombre', sql.NVarChar(100), nombre)
-            .input('Apellido', sql.NVarChar(100), apellido)
-            .input('Email', sql.NVarChar(255), email)
-            .input('NumeroTelefono', sql.NVarChar(50), telefono)
-            .input('Usuario', sql.NVarChar(50), usuario)
-            .input('Contrasena', sql.NVarChar(255), hash)
-            .query('INSERT INTO Usuarios (Nombre, Apellido, Email, Usuario, Contrasena, NumeroTelefono) VALUES (@Nombre, @Apellido, @Email, @Usuario, @Contrasena, @NumeroTelefono)');
-        sql.close();
-        res.status(201).send('Usuario registrado');
+
+        const nuevoUsuario = new Usuario({
+            token: encryptedToken,
+            nombre: encryptedNombre,
+            apellido: encryptedApellido,
+            email: encryptedEmail,
+            usuario: encryptedUsuario,
+            contrasena: encryptedContrasena,
+            numeroTelefono: encryptedTelefono,
+            activo: true
+        });
+
+        await nuevoUsuario.save(); // Guarda el usuario en MongoDB
+
+        res.status(201).send('Usuario registrado con datos cifrados');
     } catch (err) {
         console.error(err);
         sql.close();
@@ -506,27 +709,39 @@ app.post('/register', express.json(), async (req, res) => {
 
 // Ruta para iniciar sesión
 app.post('/login',  async (req, res) => {
-    const { usuario, contrasena } = req.body;
+    const { usuario, contrasena, token } = req.body;
     console.log('Received login request for user:', usuario);  // Añade un log aquí
-    console.log(usuario, contrasena);
-    const hash = crypto.createHash('sha256').update(contrasena).digest('hex');
+    console.log(usuario, contrasena, token);
+    //const hash = crypto.createHash('sha256').update(contrasena).digest('hex');
+    // Verificar si el token proporcionado es válido
+    const encryptedToken = encryptToken(token);
     try {
-        const pool = await sql.connect(dbConfig);
-        const result = await pool.request()
-            .input('Usuario', sql.NVarChar(50), usuario)
-            .input('Contrasena', sql.NVarChar(255), hash)
-            .query('SELECT * FROM Usuarios WHERE Usuario = @Usuario AND Contrasena = @Contrasena');
-        sql.close();
-        if (result.recordset.length > 0) {
-            // Inicio de sesión exitoso, genera el token
-            const user = result.recordset[0];
-            const token = generateAccessToken(usuario, user.UsuarioID);   // pasa el UsuarioID a la función
-            // console.log(token);
-            res.cookie('token', token, { httpOnly: true });  // Almacena el token como una cookie
-            res.status(200).json({ message: 'Inicio de sesión exitoso', token });  // Envía el token en la respuesta
+        
+        // Buscar al usuario por token cifrado
+        const user = await Usuario.findOne({ token: encryptedToken });
+        //console.log(user);
+        if (user) {
+            // Aquí asumimos que tus funciones de descifrado devuelven una promesa
+            //const nombreDescifrado = await decryptText(user.nombre);
+            // const apellidoDescifrado = await decryptText(user.apellido);
+            // const emailDescifrado = await decryptText(user.email);
+            const usuarioDescifrado = await decryptText(user.usuario);
+            // const contrasenaDescifrada = await decryptText(user.contrasena);
+            //console.log(nombreDescifrado + '\n' );
+            // Verificar si la contraseña es correcta
+            // if (contrasenaDescifrada !== contrasena) {
+            //     return res.status(401).json({ message: 'Credenciales inválidas' });
+            // }
+
+            // Generar token de acceso (JWT o similar)
+            // const accessToken = generateAccessToken(usuarioDescifrado, user._id);
+            // console.log(accessToken);
+            // res.cookie('token', accessToken, { httpOnly: true });
+            // return res.status(200).json({ message: 'Inicio de sesión exitoso', token: accessToken });
         } else {
             res.status(401).json({ message: 'Credenciales inválidas' });
         }
+
     } catch (err) {
         console.error(err);
         sql.close();
